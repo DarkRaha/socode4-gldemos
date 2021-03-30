@@ -1,13 +1,16 @@
 package com.darkraha.opengldemokt.gl
 
 
-
 import org.joml.Matrix4f
 import org.lwjgl.system.MemoryStack
 
 
 import org.lwjgl.opengl.GL33.*
+import org.lwjgl.stb.STBImage
 import org.lwjgl.system.MemoryUtil
+import java.io.File
+import java.lang.Exception
+import java.nio.ByteBuffer
 
 
 object GlUtils {
@@ -20,6 +23,68 @@ object GlUtils {
     const val U_PROJ_MATRIX = "projMatrix"
     const val U_VIEW_MATRIX = "viewMatrix"
     const val U_MODEL_MATRIX = "modelMatrix"
+
+    fun createTextureStub(): Int {
+        val level = 0
+        val internalFormat = GL_RGBA
+        val width = 1
+        val height = 1
+        val border = 0
+        val srcFormat = GL_RGBA
+        val srcType = GL_UNSIGNED_BYTE
+        val idTexture = glGenTextures()
+        glBindTexture(GL_TEXTURE_2D, idTexture)
+        MemoryStack.stackPush().use { stack ->
+            val buffer = stack.bytes(100.toByte(), 100.toByte(), 0.toByte(), 0xff.toByte())
+            glTexImage2D(
+                GL_TEXTURE_2D, level, internalFormat, width, height, border,
+                srcFormat, srcType, buffer
+            )
+        }
+        glBindTexture(GL_TEXTURE_2D, 0)
+        return idTexture
+    }
+
+    fun createTexture(idTex: Int, imageData: ByteBuffer, width: Int, height: Int): Int {
+
+        val idTexture = if (idTex == 0) glGenTextures() else idTex
+
+        glBindTexture(GL_TEXTURE_2D, idTexture)
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, imageData
+        )
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        return idTexture
+    }
+
+    fun loadTex2DResDefault(idTexture: Int, resPath: String?): Int {
+
+        var retIdTexture: Int = 0
+
+        try {
+            MemoryStack.stackPush().use { stack ->
+                val w = stack.mallocInt(1)
+                val h = stack.mallocInt(1)
+                val channels = stack.mallocInt(1)
+                val resource = Thread.currentThread().javaClass.getResource(resPath)
+                val filePath = File(resource.toURI()).absolutePath // encode spaces
+
+                val buffer = STBImage.stbi_load(filePath, w, h, channels, 4)
+                    ?: throw Exception("Can't load file " + filePath + " " + STBImage.stbi_failure_reason())
+
+                retIdTexture = createTexture(idTexture, buffer, w.get(), h.get())
+                STBImage.stbi_image_free(buffer)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return retIdTexture;
+    }
+
 
     fun createVAO(): Int {
         val idVao = glGenVertexArrays()
@@ -109,7 +174,8 @@ object GlUtils {
         modelMatrix?.apply {
             glUniformMatrix4fv(
                 glGetUniformLocation(idProgram, GlUtils.U_MODEL_MATRIX),
-                false, this[GlUtils.MATRIX_BUFFER] )
+                false, this[GlUtils.MATRIX_BUFFER]
+            )
         }
 
     }

@@ -3,11 +3,7 @@ package com.darkraha.opengldemoj.renders;
 import com.darkraha.opengldemoj.gl.AppOGL;
 import com.darkraha.opengldemoj.gl.GlUtils;
 import com.darkraha.opengldemoj.gl.ShaderProgram;
-import com.darkraha.opengldemoj.gl.meshes.MeshI;
-import com.darkraha.opengldemoj.gl.meshes.MeshUtils;
 import org.joml.Matrix4f;
-import org.lwjgl.opengl.GLUtil;
-import org.lwjgl.system.MemoryUtil;
 
 
 import static org.lwjgl.opengl.GL33.*;

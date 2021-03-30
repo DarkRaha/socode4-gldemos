@@ -31,9 +31,44 @@ public class GlUtils {
     public static final String U_MODEL_MATRIX = "modelMatrix";
 
 
-    public static int loadTex2DResDefault(String resPath) {
-        int idTexture = 0;
+    public static int createTextureStub() {
+        int level = 0;
+        int internalFormat = GL_RGBA;
+        int width = 1;
+        int height = 1;
+        int border = 0;
+        int srcFormat = GL_RGBA;
+        int srcType = GL_UNSIGNED_BYTE;
+        int idTexture = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, idTexture);
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer buffer = stack.bytes((byte) 100, (byte) 100, (byte) 0, (byte) 0xff);
+            glTexImage2D(GL_TEXTURE_2D, level, internalFormat, width, height, border,
+                    GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+        return idTexture;
+    }
 
+
+    public static int createTexture(int idTex, ByteBuffer imageData,
+                                    int width, int height) {
+        int idTexture = (idTex == 0) ? glGenTextures() : idTex;
+
+        glBindTexture(GL_TEXTURE_2D, idTexture);
+
+        glTexImage2D(
+                GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                GL_RGBA, GL_UNSIGNED_BYTE, imageData
+        );
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        return idTexture;
+    }
+
+    public static int loadTex2DResDefault(int idTex, String resPath) {
+        int idTexture = 0;
         try (MemoryStack stack = MemoryStack.stackPush()) {
 
             IntBuffer w = stack.mallocInt(1);
@@ -41,26 +76,20 @@ public class GlUtils {
             IntBuffer channels = stack.mallocInt(1);
             URL resource = Thread.currentThread().getClass().getResource(resPath);
             String filePath = new File(resource.toURI()).getAbsolutePath(); // encode spaces
-            System.out.println("File Path: " + filePath);
-            System.out.println("File Path: " + resource.toURI().toString());
             ByteBuffer buffer = STBImage.stbi_load(filePath, w, h, channels, 4);
 
             if (buffer == null) {
                 throw new Exception("Can't load file " + filePath + " " + stbi_failure_reason());
             }
 
-            idTexture = glGenTextures();
-            glBindTexture(GL_TEXTURE_2D, idTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w.get(), h.get(), 0,
-                    GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+            idTexture = createTexture(idTex, buffer, w.get(), h.get());
             stbi_image_free(buffer);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return idTexture;
     }
+
 
     public static int createVAO() {
         int idVao = glGenVertexArrays();

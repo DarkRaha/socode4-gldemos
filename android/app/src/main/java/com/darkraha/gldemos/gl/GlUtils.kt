@@ -1,10 +1,16 @@
 package com.darkraha.gldemos.gl
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.opengl.GLES30.*
+import android.opengl.GLUtils
 import org.joml.Matrix4f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
+import android.graphics.BitmapFactory
+import android.opengl.GLES20
+
 
 object GlUtils {
 
@@ -24,8 +30,42 @@ object GlUtils {
     const val U_VIEW_MATRIX = "viewMatrix"
     const val U_MODEL_MATRIX = "modelMatrix"
 
+    fun createTexture(idTex: Int, imageData: Bitmap): Int {
+
+        val idTexture = if (idTex == 0) {
+            glGenTextures(1, ID_ARRAY, 0)
+            ID_ARRAY[0]
+        } else {
+            idTex
+        }
+
+        glBindTexture(GL_TEXTURE_2D, idTexture)
+
+        GLUtils.texImage2D(GL_TEXTURE_2D, 0, imageData, 0);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        return idTexture
+    }
+
+    fun loadTex2DResDefault(idTexture: Int, context: Context, resId: Int): Int {
+
+        val options = BitmapFactory.Options()
+        options.inScaled = false // without pre-scaling
+
+        // Read in the resource
+        // on the pixel emulator  a 1024x1024 jpg texture worked successful
+        val bitmap = BitmapFactory.decodeResource(context.resources, resId, options)
+
+        val retIdTexture = createTexture(idTexture, bitmap)
+
+        // recycle the bitmap, since its data has been loaded into OpenGL.
+        bitmap.recycle()
+        return retIdTexture
+    }
+
     fun createVAO(): Int {
-        glGenVertexArrays(1, ID_ARRAY,0)
+        glGenVertexArrays(1, ID_ARRAY, 0)
         glBindVertexArray(ID_ARRAY[0])
         return ID_ARRAY[0]
     }
@@ -83,7 +123,7 @@ object GlUtils {
 
     fun bindMatrix(idProgram: Int, matrix: Matrix4f) {
         glUniformMatrix4fv(
-            glGetUniformLocation(idProgram, U_MATRIX),1,
+            glGetUniformLocation(idProgram, U_MATRIX), 1,
             false, matrix[MATRIX_BUFFER]
         )
     }
@@ -93,23 +133,46 @@ object GlUtils {
 
         projMatrix?.apply {
             glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_PROJ_MATRIX),1,
+                glGetUniformLocation(idProgram, U_PROJ_MATRIX), 1,
                 false, this[MATRIX_BUFFER]
             )
         }
 
         viewMatrix?.apply {
             glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_VIEW_MATRIX),1,
+                glGetUniformLocation(idProgram, U_VIEW_MATRIX), 1,
                 false, this[MATRIX_BUFFER]
             )
         }
 
         modelMatrix?.apply {
             glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_MODEL_MATRIX),1,
+                glGetUniformLocation(idProgram, U_MODEL_MATRIX), 1,
                 false, this[MATRIX_BUFFER]
             )
         }
+    }
+
+    fun delete(idVao: Int, idVbo: Int, idIbo: Int, idTex: Int) {
+        if (idVao > 0) {
+            ID_ARRAY[0] = idVao
+            glDeleteVertexArrays(1, ID_ARRAY, 0)
+        }
+
+        if (idVbo > 0) {
+            ID_ARRAY[0] = idVbo
+            glDeleteBuffers(1, ID_ARRAY, 0)
+        }
+
+        if (idIbo > 0) {
+            ID_ARRAY[0] = idIbo
+            glDeleteBuffers(1, ID_ARRAY, 0)
+        }
+
+        if (idTex > 0) {
+            ID_ARRAY[0] = idTex
+            glDeleteTextures(1, ID_ARRAY, 0)
+        }
+
     }
 }

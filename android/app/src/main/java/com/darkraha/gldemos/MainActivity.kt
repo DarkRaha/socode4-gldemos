@@ -14,15 +14,17 @@ import com.darkraha.gldemos.renders.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var glSurfaceView: GLSurfaceView
-    private  var render : Render? =null
+    private var render: Render? = null
     private val GL_VERSION_MAJOR = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if(!isOpenGlSupported(GL_VERSION_MAJOR)){
-            Toast.makeText(this, "OpenGl ES $GL_VERSION_MAJOR is not supported",
-                Toast.LENGTH_LONG).show()
+        if (!isOpenGlSupported(GL_VERSION_MAJOR)) {
+            Toast.makeText(
+                this, "OpenGl ES $GL_VERSION_MAJOR is not supported",
+                Toast.LENGTH_LONG
+            ).show()
             finish()
             return
         }
@@ -30,9 +32,10 @@ class MainActivity : AppCompatActivity() {
         // set view programmatically
         glSurfaceView = GLSurfaceView(this)
         glSurfaceView.setEGLContextClientVersion(3)
+        render = TexturedQuadRender(this)
         // render = QuadRender()
         // render = ColoredQuadRender()
-        render = ColoredCubeRender()
+        //render = ColoredCubeRender()
         glSurfaceView.setRenderer(render)
         setContentView(glSurfaceView)
     }
@@ -55,8 +58,10 @@ class MainActivity : AppCompatActivity() {
         // The upper order 16 bits of reqGlEsVersion represent the major version
         // and the lower order 16 bits the minor version.
         return if (configInfo.reqGlEsVersion != ConfigurationInfo.GL_ES_VERSION_UNDEFINED) {
-            Toast.makeText(this, "Supported version OpenGl ${configInfo.reqGlEsVersion shr 16}",
-                Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this, "Supported version OpenGl ${configInfo.reqGlEsVersion shr 16}",
+                Toast.LENGTH_LONG
+            ).show()
             (configInfo.reqGlEsVersion shr 16) >= major
         } else {
             1 >= major

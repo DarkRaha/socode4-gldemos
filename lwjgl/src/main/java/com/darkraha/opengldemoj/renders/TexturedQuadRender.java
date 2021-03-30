@@ -6,13 +6,6 @@ import com.darkraha.opengldemoj.gl.ShaderProgram;
 
 
 import org.joml.Matrix4f;
-
-import java.io.*;
-import java.net.URL;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.channels.FileChannel;
-
 import static org.lwjgl.opengl.GL33.*;
 
 
@@ -38,7 +31,7 @@ public class TexturedQuadRender extends Render {
 
         matrix = new Matrix4f();
 
-        idTexture = GlUtils.loadTex2DResDefault("/textures/235.jpg");
+        idTexture = GlUtils.loadTex2DResDefault(0,"/textures/235.jpg");
         idVao = GlUtils.createVAO();
         idVbo = GlUtils.createVBO(new float[]{
                 // coords         texture coords
@@ -87,7 +80,7 @@ public class TexturedQuadRender extends Render {
         GlUtils.bindMatrix(prog.idProgram, matrix);
         glBindVertexArray(idVao);
 
-        glEnable(GL_CULL_FACE);
+       // glEnable(GL_CULL_FACE);
         glDrawArrays(GL_TRIANGLES, 0, 6); // vertex count
     }
 

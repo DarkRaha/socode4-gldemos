@@ -49,7 +49,7 @@ class QuadRender : Render() {
         )
 
         glBindBuffer(GL_ARRAY_BUFFER, idVbo)
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4) // vertex count     glUseProgram(0)
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
     }
 
 }
