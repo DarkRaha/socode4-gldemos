@@ -23,8 +23,8 @@ class OpenGLKt {
            // AppOGL.isV120 = true; AppOGL(QuadRender(), 300, 300)
           //  val app = AppOGL(300, 300)
            // val app = AppOGL(ColoredQuadRender(), 300, 300)
-           //val app = AppOGL(ColoredCubeRender(), 300, 300)
-            val app = AppOGL(TexturedQuadRender(), 300, 300)
+           val app = AppOGL(ColoredCubeRender(), 300, 300)
+           // val app = AppOGL(TexturedQuadRender(), 300, 300)
         }
     }
 }

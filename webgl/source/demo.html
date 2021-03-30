@@ -24,6 +24,7 @@
     <script src="js/renders/quadrender.js"></script>
     <script src="js/renders/coloredquadrender.js"></script>
     <script src="js/renders/texturedquadrender.js"></script>
+    <script src="js/renders/coloredcuberender.js"></script>
 
 </head>
 
@@ -35,7 +36,9 @@
     <script>
         $(() => {
             const app = new AppOGL("myCanvas");
-            app.setRender(new TexturedQuadRender());
+            app.setRender(new ColoredCubeRender());
+
+            //app.setRender(new TexturedQuadRender());
             //app.setRender(new ColoredQuadRender());
             //  app.setRender(new ColoredCubeRender());   
             //app.setRender(new QuadRender());

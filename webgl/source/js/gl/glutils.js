@@ -92,3 +92,12 @@ GlUtils.bindAttributes = function(gl, idVbo, numCoords,
             gl.FLOAT, false, stride, 4 * (numCoords + numColorComponents));
     }
 }
+
+GlUtils.createIBO = function(gl, data) {
+    const idIbo = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idIbo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+        new Uint8Array(data), gl.STATIC_DRAW);
+
+    return idIbo;
+}
