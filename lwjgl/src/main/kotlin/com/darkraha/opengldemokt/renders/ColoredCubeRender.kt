@@ -28,16 +28,18 @@ class ColoredCubeRender : Render() {
 
         idVao = GlUtils.createVAO()
         idVbo = GlUtils.createVBO(
-            floatArrayOf( // front
-                -1.0f, -1.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,
-                1.0f, -1.0f, 1.0f,  /**/ 0.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, 1.0f,   /**/ 0.0f, 0.0f, 1.0f,
-                -1.0f, 1.0f, 1.0f,  /**/ 1.0f, 1.0f, 1.0f,
+            floatArrayOf(
+                // coords                colors
+                // front
+                -1.0f, -1.0f, 1.0f, /* */ 1.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, 1.0f,  /* */ 0.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 1.0f,   /* */ 0.0f, 0.0f, 1.0f,
+                -1.0f, 1.0f, 1.0f,  /* */ 1.0f, 1.0f, 1.0f,
                 // back
-                -1.0f, -1.0f, -1.0f, /**/ 1.0f, 0.0f, 0.0f,
-                1.0f, -1.0f, -1.0f,  /**/ 0.0f, 1.0f, 0.0f,
-                1.0f, 1.0f, -1.0f,   /**/ 0.0f, 0.0f, 1.0f,
-                -1.0f, 1.0f, -1.0f,  /**/ 1.0f, 1.0f, 1.0f
+                -1.0f, -1.0f, -1.0f, /* */ 1.0f, 0.0f, 0.0f,
+                1.0f, -1.0f, -1.0f,  /* */ 0.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, -1.0f,   /* */ 0.0f, 0.0f, 1.0f,
+                -1.0f, 1.0f, -1.0f,  /* */ 1.0f, 1.0f, 1.0f
             )
         )
 
@@ -89,8 +91,6 @@ class ColoredCubeRender : Render() {
         GlUtils.bindMatrix(prog.idProgram, matrix)
 
         glBindVertexArray(idVao)
-        //  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)
-
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0)
     }
 

@@ -153,6 +153,53 @@ object GlUtils {
         }
     }
 
+
+    /**
+     * @param coords    x,y,z
+     * @param colors    r,g,b,a
+     * @param texcoords s,t
+     * @param indices
+     * @return
+     */
+    fun prepareVertexData(
+        coords: FloatArray?,
+        colors: FloatArray?,
+        texcoords: FloatArray?,
+        indices: ByteArray?
+    ): IntArray {
+        val ret = IntArray(4)
+        if (coords != null) {
+            ret[0] = createVBO(coords)
+            glEnableVertexAttribArray(A_LOCATION_COORDS)
+            glVertexAttribPointer( A_LOCATION_COORDS,
+                3, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (colors != null) {
+            ret[1] = createVBO(colors)
+            glEnableVertexAttribArray(A_LOCATION_COLORS)
+            glVertexAttribPointer( A_LOCATION_COLORS,
+                4, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (texcoords != null) {
+            ret[2] = createVBO(texcoords)
+            glEnableVertexAttribArray(A_LOCATION_TEXCOORDS)
+            glVertexAttribPointer(
+                A_LOCATION_TEXCOORDS,
+                2, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (indices != null) {
+            ret[3] = createIBO(indices)
+        }
+        return ret
+    }
+
+
     fun delete(idVao: Int, idVbo: Int, idIbo: Int, idTex: Int) {
         if (idVao > 0) {
             ID_ARRAY[0] = idVao

@@ -29,12 +29,15 @@ GlUtils.createTexture = function(gl, idTexture, image) {
     return idTexture;
 }
 
-GlUtils.loadTextureDefault = function loadTexture(gl, url) {
+GlUtils.loadTextureDefault = function loadTexture(gl, url, cb) {
     const texture = GlUtils.createTextureStub(gl);
 
     const image = new Image();
     image.onload = function() {
         GlUtils.createTexture(gl, texture, image);
+        if (!!cb) {
+            cb(gl, texture, image);
+        }
     };
     image.src = url;
     return texture;
@@ -100,4 +103,47 @@ GlUtils.createIBO = function(gl, data) {
         new Uint8Array(data), gl.STATIC_DRAW);
 
     return idIbo;
+}
+
+
+
+
+GlUtils.prepareVertexData = function(
+    gl, coords,
+    colors,
+    texcoords,
+    indices) {
+    const ret = [0, 0, 0, 0];
+
+    if (coords != null) {
+        ret[0] = GlUtils.createVBO(gl, coords);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(
+            0,
+            3, gl.FLOAT, false,
+            0, 0
+        );
+    }
+    if (colors != null) {
+        ret[1] = GlUtils.createVBO(gl, colors);
+        gl.enableVertexAttribArray(1);
+        gl.vertexAttribPointer(
+            1,
+            4, gl.FLOAT, false,
+            0, 0
+        );
+    }
+    if (texcoords != null) {
+        ret[2] = GlUtils.createVBO(gl, texcoords);
+        gl.enableVertexAttribArray(3);
+        gl.vertexAttribPointer(
+            3,
+            2, gl.FLOAT, false,
+            0, 0
+        );
+    }
+    if (indices != null) {
+        ret[3] = GlUtils.createIBO(gl, indices);
+    }
+    return ret;
 }

@@ -106,10 +106,52 @@ public class GlUtils {
             FloatBuffer fb = stack.mallocFloat(data.length);
             fb.put(data).flip();
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-
             return idVbo;
         }
     }
+
+
+    /**
+     * @param coords    x,y,z
+     * @param colors    r,g,b,a
+     * @param texcoords s,t
+     * @param indices
+     * @return
+     */
+    public static int[] prepareVertexData(float[] coords, float[] colors, float[] texcoords, byte[] indices) {
+
+        int[] ret = new int[4];
+
+        if (coords != null) {
+            ret[0] = createVBO(coords);
+            glEnableVertexAttribArray(A_LOCATION_COORDS);
+            glVertexAttribPointer(A_LOCATION_COORDS,
+                    3, GL_FLOAT, false,
+                    0, 0);
+        }
+
+        if (colors != null) {
+            ret[1] = createVBO(colors);
+            glEnableVertexAttribArray(A_LOCATION_COLORS);
+            glVertexAttribPointer(A_LOCATION_COLORS,
+                    4, GL_FLOAT, false,
+                    0, 0);
+        }
+
+        if (texcoords != null) {
+            ret[2] = createVBO(texcoords);
+            glEnableVertexAttribArray(A_LOCATION_TEXCOORDS);
+            glVertexAttribPointer(A_LOCATION_TEXCOORDS,
+                    2, GL_FLOAT, false,
+                    0, 0);
+        }
+
+        if(indices!=null){
+            ret[3] = createIBO(indices);
+        }
+        return ret;
+    }
+
 
     public static int createIBO(byte[] data) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -118,7 +160,6 @@ public class GlUtils {
             int idIbo = glGenBuffers();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             return idIbo;
         }
     }
@@ -150,8 +191,6 @@ public class GlUtils {
                     2, GL_FLOAT, false,
                     stride, 4L * (numCoords + numColorComponents));
         }
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
 

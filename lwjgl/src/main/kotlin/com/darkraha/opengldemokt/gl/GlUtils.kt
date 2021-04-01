@@ -92,6 +92,51 @@ object GlUtils {
         return idVao
     }
 
+    /**
+     * @param coords    x,y,z
+     * @param colors    r,g,b,a
+     * @param texcoords s,t
+     * @param indices
+     * @return
+     */
+    fun prepareVertexData(
+        coords: FloatArray?,
+        colors: FloatArray?,
+        texcoords: FloatArray?,
+        indices: ByteArray?
+    ): IntArray {
+        val ret = IntArray(4)
+        if (coords != null) {
+            ret[0] = createVBO(coords)
+            glEnableVertexAttribArray(A_LOCATION_COORDS)
+            glVertexAttribPointer( A_LOCATION_COORDS,
+                3, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (colors != null) {
+            ret[1] = createVBO(colors)
+            glEnableVertexAttribArray(A_LOCATION_COLORS)
+            glVertexAttribPointer( A_LOCATION_COLORS,
+                4, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (texcoords != null) {
+            ret[2] = createVBO(texcoords)
+            glEnableVertexAttribArray(A_LOCATION_TEXCOORDS)
+            glVertexAttribPointer(
+                A_LOCATION_TEXCOORDS,
+                2, GL_FLOAT, false,
+                0, 0
+            )
+        }
+        if (indices != null) {
+            ret[3] = createIBO(indices)
+        }
+        return ret
+    }
+
     fun createVBO(data: FloatArray): Int {
         MemoryStack.stackPush().use { stack ->
             val idVbo = glGenBuffers()
@@ -110,7 +155,6 @@ object GlUtils {
             val idIbo = glGenBuffers()
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW)
-            //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
             return idIbo
         }
     }
@@ -144,7 +188,6 @@ object GlUtils {
                 stride, 4L * (numCoords + numColorComponents)
             )
         }
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
     }
 
     fun bindMatrix(idProgram: Int, matrix: Matrix4f) {
