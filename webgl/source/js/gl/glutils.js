@@ -112,8 +112,10 @@ GlUtils.prepareVertexData = function(
     gl, coords,
     colors,
     texcoords,
-    indices) {
-    const ret = [0, 0, 0, 0];
+    indices,
+    normals = null
+) {
+    const ret = [0, 0, 0, 0, 0];
 
     if (coords != null) {
         ret[0] = GlUtils.createVBO(gl, coords);
@@ -144,6 +146,12 @@ GlUtils.prepareVertexData = function(
     }
     if (indices != null) {
         ret[3] = GlUtils.createIBO(gl, indices);
+    }
+
+    if (normals != null) {
+        ret[2] = GlUtils.createVBO(gl, normals);
+        gl.enableVertexAttribArray(2);
+        gl.vertexAttribPointer(2, 3, gl.FLOAT, false, 0, 0);
     }
     return ret;
 }

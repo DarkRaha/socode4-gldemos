@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
         // set view programmatically
         glSurfaceView = GLSurfaceView(this)
         glSurfaceView.setEGLContextClientVersion(3)
-        render = TexturedCubeRender(this)
+
+        render = LightTexturedCubeRender(this)
         //render = TexturedQuadRender(this)
         // render = QuadRender()
         // render = ColoredQuadRender()

@@ -29,6 +29,7 @@ object GlUtils {
     const val U_PROJ_MATRIX = "projMatrix"
     const val U_VIEW_MATRIX = "viewMatrix"
     const val U_MODEL_MATRIX = "modelMatrix"
+    const val U_NORMAL_MATRIX = "normalMatrix"
 
     fun createTexture(idTex: Int, imageData: Bitmap): Int {
 
@@ -128,6 +129,12 @@ object GlUtils {
         )
     }
 
+    fun bindNormalMatrix(idProgram: Int, matrix: Matrix4f) {
+        glUniformMatrix4fv(
+            glGetUniformLocation(idProgram, U_NORMAL_MATRIX),1,
+            false, matrix[MATRIX_BUFFER]
+        )
+    }
 
     fun bindMatrices(idProgram: Int, projMatrix: Matrix4f?, viewMatrix: Matrix4f?, modelMatrix: Matrix4f?) {
 
@@ -159,43 +166,42 @@ object GlUtils {
      * @param colors    r,g,b,a
      * @param texcoords s,t
      * @param indices
+     * @param normals
      * @return
      */
     fun prepareVertexData(
         coords: FloatArray?,
         colors: FloatArray?,
         texcoords: FloatArray?,
-        indices: ByteArray?
+        indices: ByteArray?,
+        normals: FloatArray? = null
     ): IntArray {
-        val ret = IntArray(4)
+        val ret = IntArray(5)
+
         if (coords != null) {
             ret[0] = createVBO(coords)
             glEnableVertexAttribArray(A_LOCATION_COORDS)
-            glVertexAttribPointer( A_LOCATION_COORDS,
-                3, GL_FLOAT, false,
-                0, 0
-            )
+            glVertexAttribPointer( A_LOCATION_COORDS,3, GL_FLOAT, false,0, 0)
         }
         if (colors != null) {
             ret[1] = createVBO(colors)
             glEnableVertexAttribArray(A_LOCATION_COLORS)
-            glVertexAttribPointer( A_LOCATION_COLORS,
-                4, GL_FLOAT, false,
-                0, 0
-            )
+            glVertexAttribPointer( A_LOCATION_COLORS,4, GL_FLOAT, false,0, 0)
         }
         if (texcoords != null) {
             ret[2] = createVBO(texcoords)
             glEnableVertexAttribArray(A_LOCATION_TEXCOORDS)
-            glVertexAttribPointer(
-                A_LOCATION_TEXCOORDS,
-                2, GL_FLOAT, false,
-                0, 0
-            )
+            glVertexAttribPointer(A_LOCATION_TEXCOORDS,2, GL_FLOAT, false,0, 0)
         }
         if (indices != null) {
             ret[3] = createIBO(indices)
         }
+        if (normals != null) {
+            ret[4] = createVBO(normals)
+            glEnableVertexAttribArray(A_LOCATION_NORMALS)
+            glVertexAttribPointer(A_LOCATION_NORMALS, 3, GL_FLOAT, false, 0, 0)
+        }
+
         return ret
     }
 

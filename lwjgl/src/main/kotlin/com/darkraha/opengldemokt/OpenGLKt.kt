@@ -17,7 +17,8 @@ class OpenGLKt {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            val app = AppOGL(TexturedCubeRender(), 300, 300)
+            val app = AppOGL(LightTexturedCubeRender(), 300, 300)
+          //  val app = AppOGL(TexturedCubeRender(), 300, 300)
            // AppOGL.isV120 = true; AppOGL(QuadRender(), 300, 300)
           //  val app = AppOGL(300, 300)
            // val app = AppOGL(ColoredQuadRender(), 300, 300)

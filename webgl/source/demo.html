@@ -20,12 +20,17 @@
     <script src="js/gl/appogl.js"></script>
     <script src="js/gl/shaderprogram.js"></script>
     <script src="js/gl/glutils.js"></script>
+    <script src="js/gl/shaders/shaderbuildera.js"></script>
+    <script src="js/gl/shaders/vertexshaderbuilder.js"></script>
+    <script src="js/gl/shaders/fragmentshaderbuilder.js"></script>
+
     <script src="js/renders/render.js"></script>
     <script src="js/renders/quadrender.js"></script>
     <script src="js/renders/coloredquadrender.js"></script>
     <script src="js/renders/texturedquadrender.js"></script>
     <script src="js/renders/coloredcuberender.js"></script>
     <script src="js/renders/texturedcuberender.js"></script>
+    <script src="js/renders/lighttexturedcuberender.js"></script>
 
 </head>
 
@@ -37,7 +42,10 @@
     <script>
         $(() => {
             const app = new AppOGL("myCanvas");
-            app.setRender(new TexturedCubeRender());
+
+
+            app.setRender(new LightTexturedCubeRender());
+            //app.setRender(new TexturedCubeRender());
             // app.setRender(new ColoredCubeRender());
 
             //app.setRender(new TexturedQuadRender());

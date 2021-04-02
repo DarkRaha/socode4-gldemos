@@ -27,8 +27,10 @@ public class GlUtils {
     public static final int A_LOCATION_TEXCOORDS = 3;
     public static final String U_MATRIX = "matrix";
     public static final String U_PROJ_MATRIX = "projMatrix";
+    public static final String U_VIEW_MODEL_MATRIX = "viewModelMatrix";
     public static final String U_VIEW_MATRIX = "viewMatrix";
     public static final String U_MODEL_MATRIX = "modelMatrix";
+    public static final String U_NORMAL_MATRIX = "normalMatrix";
 
 
     public static int createTextureStub() {
@@ -119,8 +121,13 @@ public class GlUtils {
      * @return
      */
     public static int[] prepareVertexData(float[] coords, float[] colors, float[] texcoords, byte[] indices) {
+               return prepareVertexData(coords, colors, texcoords, indices, null);
+    }
 
-        int[] ret = new int[4];
+
+    public static int[] prepareVertexData(float[] coords, float[] colors, float[] texcoords, byte[] indices, float[] normals) {
+
+        int[] ret = new int[5];
 
         if (coords != null) {
             ret[0] = createVBO(coords);
@@ -149,9 +156,16 @@ public class GlUtils {
         if(indices!=null){
             ret[3] = createIBO(indices);
         }
+
+        if(normals!=null){
+            ret[4] = createVBO(normals);
+            glEnableVertexAttribArray(A_LOCATION_NORMALS);
+            glVertexAttribPointer(A_LOCATION_NORMALS,
+                    3, GL_FLOAT, false,
+                    0, 0);
+        }
         return ret;
     }
-
 
     public static int createIBO(byte[] data) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -196,6 +210,11 @@ public class GlUtils {
 
     public static void bindMatrix(int idProgram, Matrix4f matrix) {
         glUniformMatrix4fv(glGetUniformLocation(idProgram, U_MATRIX),
+                false, matrix.get(MATRIX_BUFFER));
+    }
+
+    public static void bindNormalMatrix(int idProgram, Matrix4f matrix) {
+        glUniformMatrix4fv(glGetUniformLocation(idProgram, U_NORMAL_MATRIX),
                 false, matrix.get(MATRIX_BUFFER));
     }
 
