@@ -20,39 +20,22 @@ import static org.lwjgl.stb.STBImage.stbi_image_free;
 
 public class GlUtils {
 
-    public static final FloatBuffer MATRIX_BUFFER = MemoryUtil.memAllocFloat(16);
+
     public static final int A_LOCATION_COORDS = 0;
     public static final int A_LOCATION_COLORS = 1;
     public static final int A_LOCATION_NORMALS = 2;
     public static final int A_LOCATION_TEXCOORDS = 3;
-    public static final String U_MATRIX = "matrix";
-    public static final String U_PROJ_MATRIX = "projMatrix";
-    public static final String U_VIEW_MODEL_MATRIX = "viewModelMatrix";
-    public static final String U_VIEW_MATRIX = "viewMatrix";
-    public static final String U_MODEL_MATRIX = "modelMatrix";
-    public static final String U_NORMAL_MATRIX = "normalMatrix";
 
 
-    public static int createTextureStub() {
-        int level = 0;
-        int internalFormat = GL_RGBA;
-        int width = 1;
-        int height = 1;
-        int border = 0;
-        int srcFormat = GL_RGBA;
-        int srcType = GL_UNSIGNED_BYTE;
-        int idTexture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, idTexture);
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            ByteBuffer buffer = stack.bytes((byte) 100, (byte) 100, (byte) 0, (byte) 0xff);
-            glTexImage2D(GL_TEXTURE_2D, level, internalFormat, width, height, border,
-                    GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-        }
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return idTexture;
-    }
-
-
+    /**
+     * Create 2D texture and upload data to it.
+     *
+     * @param idTex
+     * @param imageData
+     * @param width
+     * @param height
+     * @return
+     */
     public static int createTexture(int idTex, ByteBuffer imageData,
                                     int width, int height) {
         int idTexture = (idTex == 0) ? glGenTextures() : idTex;
@@ -113,6 +96,26 @@ public class GlUtils {
     }
 
 
+    public static int createVBO(float[] data, int locations, int size) {
+
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            int idVbo = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, idVbo);
+
+            FloatBuffer fb = stack.mallocFloat(data.length);
+            fb.put(data).flip();
+            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(locations);
+            glVertexAttribPointer(locations,
+                    size, GL_FLOAT, false,
+                    0, 0);
+
+            return idVbo;
+        }
+    }
+
+
     /**
      * @param coords    x,y,z
      * @param colors    r,g,b,a
@@ -121,7 +124,7 @@ public class GlUtils {
      * @return
      */
     public static int[] prepareVertexData(float[] coords, float[] colors, float[] texcoords, byte[] indices) {
-               return prepareVertexData(coords, colors, texcoords, indices, null);
+        return prepareVertexData(coords, colors, texcoords, indices, null);
     }
 
 
@@ -153,11 +156,11 @@ public class GlUtils {
                     0, 0);
         }
 
-        if(indices!=null){
+        if (indices != null) {
             ret[3] = createIBO(indices);
         }
 
-        if(normals!=null){
+        if (normals != null) {
             ret[4] = createVBO(normals);
             glEnableVertexAttribArray(A_LOCATION_NORMALS);
             glVertexAttribPointer(A_LOCATION_NORMALS,
@@ -170,6 +173,18 @@ public class GlUtils {
     public static int createIBO(byte[] data) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
             ByteBuffer byteBuffer = stack.malloc(data.length);
+            byteBuffer.put(data).flip();
+            int idIbo = glGenBuffers();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW);
+            return idIbo;
+        }
+    }
+
+
+    public static int createIBO(int[] data) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            IntBuffer byteBuffer = stack.malloc(data.length * 4).asIntBuffer();
             byteBuffer.put(data).flip();
             int idIbo = glGenBuffers();
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
@@ -207,32 +222,4 @@ public class GlUtils {
         }
     }
 
-
-    public static void bindMatrix(int idProgram, Matrix4f matrix) {
-        glUniformMatrix4fv(glGetUniformLocation(idProgram, U_MATRIX),
-                false, matrix.get(MATRIX_BUFFER));
-    }
-
-    public static void bindNormalMatrix(int idProgram, Matrix4f matrix) {
-        glUniformMatrix4fv(glGetUniformLocation(idProgram, U_NORMAL_MATRIX),
-                false, matrix.get(MATRIX_BUFFER));
-    }
-
-
-    public static void bindMatrices(int idProgram, Matrix4f projMatrix, Matrix4f viewMatrix, Matrix4f modelMatrix) {
-        if (projMatrix != null) {
-            glUniformMatrix4fv(glGetUniformLocation(idProgram, U_PROJ_MATRIX),
-                    false, projMatrix.get(MATRIX_BUFFER));
-        }
-
-        if (viewMatrix != null) {
-            glUniformMatrix4fv(glGetUniformLocation(idProgram, U_VIEW_MATRIX),
-                    false, viewMatrix.get(MATRIX_BUFFER));
-        }
-
-        if (modelMatrix != null) {
-            glUniformMatrix4fv(glGetUniformLocation(idProgram, U_MODEL_MATRIX),
-                    false, modelMatrix.get(MATRIX_BUFFER));
-        }
-    }
 }

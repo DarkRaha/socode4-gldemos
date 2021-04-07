@@ -1,21 +1,28 @@
 package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.AppOGL;
-import com.darkraha.opengldemoj.gl.GlUtils;
 import com.darkraha.opengldemoj.gl.ShaderProgram;
+import com.darkraha.opengldemoj.gl.ShaderProgramBuilder;
 import org.joml.Matrix4f;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 import static org.lwjgl.opengl.GL33.*;
 
-
+/**
+ * Render colored cube. Demonstrate how to use VAO with single VBO and IBO.
+ */
 public class ColoredCubeRender extends Render {
 
-
+    private final FloatBuffer matrixBuffer = MemoryUtil.memAllocFloat(16);
     private Matrix4f matrix;
     private ShaderProgram prog;
-    private float rotY = 0;
-    private float rotX = 0;
+    private float rotY = 1.5f * TO_RAD;
+    private float rotX = TO_RAD;
     private int idVao;
     private int idVbo;
     private int idIbo;
@@ -26,15 +33,17 @@ public class ColoredCubeRender extends Render {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
 
-        prog = new ShaderProgram();
+        prog = new ShaderProgramBuilder()
+                .vertexAttributes(true, false, false)
+                .build();
+
         glUseProgram(prog.idProgram);
 
-        matrix = new Matrix4f();
+        matrix = new Matrix4f()
+                .perspective(45 * TO_RAD, aspect, 1f, 100f)
+                .translate(0, 0f, -6f);
 
-        idVao = glGenVertexArrays();
-        glBindVertexArray(idVao);
-
-        idVbo = GlUtils.createVBO(new float[]{
+        float[] data = new float[]{
                 // coords             colors
                 // front
                 -1.0f, -1.0f, 1.0f, /*  */ 1.0f, 0.0f, 0.0f,
@@ -45,11 +54,9 @@ public class ColoredCubeRender extends Render {
                 -1.0f, -1.0f, -1.0f, /*  */ 1.0f, 0.0f, 0.0f,
                 1.0f, -1.0f, -1.0f,  /*  */ 0.0f, 1.0f, 0.0f,
                 1.0f, 1.0f, -1.0f,   /*  */ 0.0f, 0.0f, 1.0f,
-                -1.0f, 1.0f, -1.0f,  /*  */ 1.0f, 1.0f, 1.0f});
+                -1.0f, 1.0f, -1.0f,  /*  */ 1.0f, 1.0f, 1.0f};
 
-        GlUtils.bindAttributes(idVbo, 3, 3, false);
-
-        idIbo = GlUtils.createIBO(new byte[]{
+        byte[] indices = new byte[]{
                 // front
                 0, 1, 2,
                 2, 3, 0,
@@ -68,7 +75,47 @@ public class ColoredCubeRender extends Render {
                 // top
                 3, 2, 6,
                 6, 7, 3
-        });
+        };
+
+        idVao = glGenVertexArrays();
+        glBindVertexArray(idVao);
+
+        //-----------------------------------------------
+        // create VBO and upload data into it. It will be attached to the current VAO.
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            idVbo = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, idVbo);
+
+            FloatBuffer fb = stack.mallocFloat(data.length);
+            fb.put(data).flip();
+            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+        }
+
+        //-----------------------------------------------
+        // specify locations of attributes in data
+        int stride = 4 * (3 + 3); // 4 - size of float in bytes, 3 - x,y,z, 3 - r,g,b
+        glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_POS);
+        glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_POS,
+                3, GL_FLOAT, false,
+                stride, 0);
+
+        int colorOffset = 4 * 3; // 4 - size of float in bytes, 3 - x,y,z
+        glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR);
+        glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR,
+                3, GL_FLOAT, false, stride, colorOffset);
+
+
+        //-----------------------------------------------
+        // create IBO and upload data into it.
+        // It will be attached to the current VAO.
+        // IBO does not restricted by byte indices.
+        try (MemoryStack stack = MemoryStack.stackPush()) {
+            ByteBuffer byteBuffer = stack.malloc(indices.length);
+            byteBuffer.put(indices).flip();
+            idIbo = glGenBuffers();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW);
+        }
 
         glBindVertexArray(0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -77,30 +124,19 @@ public class ColoredCubeRender extends Render {
 
     @Override
     public void onDrawFrame(AppOGL appOGL) {
-        rotY += 1.5f * TO_RAD;
-        if (rotY > 2 * PI_F) {
-            rotY = rotY - 2 * PI_F;
-        }
-
-        rotX += 1f * TO_RAD;
-        if (rotX > 2 * PI_F) {
-            rotX = rotX - 2 * PI_F;
-        }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        GlUtils.bindMatrix(prog.idProgram, matrix.identity()
-                .perspective(45 * TO_RAD,
-                        aspect,
-                        1f, 100f)
-                .translate(0, 0f, -6f)
-                .rotateAffineXYZ(rotX, rotY, 0));
+        // add rotation to the our cube
+        matrix.rotateAffineXYZ(rotX, rotY, 0);
 
         glUseProgram(prog.idProgram);
-        glUniform1i(glGetUniformLocation(prog.idProgram, "withTexture"), 0);
-        glUniform4f(glGetUniformLocation(prog.idProgram, "uColor"), -1, -1, -1, -1);
+        glUniformMatrix4fv(glGetUniformLocation(prog.idProgram, ShaderProgramBuilder.U_MATRIX_NAMES[0]),
+                false, matrix.get(matrixBuffer));
 
         glBindVertexArray(idVao);
+
+        // be careful, we used byte indices, so we draw with GL_UNSIGNED_BYTE
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, 0);
     }
 

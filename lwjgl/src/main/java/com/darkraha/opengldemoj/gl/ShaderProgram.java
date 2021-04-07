@@ -1,15 +1,36 @@
 package com.darkraha.opengldemoj.gl;
 
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.system.MemoryUtil;
+
+import java.nio.FloatBuffer;
+
+import static com.darkraha.opengldemoj.gl.ShaderProgramBuilder.*;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL33.*;
 
 public class ShaderProgram {
+    public static final FloatBuffer MATRIX_BUFFER = MemoryUtil.memAllocFloat(16);
+
     private int[] ids;
+    private final int[] matricesLocations = new int[U_MATRIX_NAMES.length];
+    private final int[] samplersLocations = new int[8];
+    private int[] light = new int[3];
+    private int normalLocation;
+
+    public int solidColorLocation;
     public int idProgram;
 
 
     public ShaderProgram() {
-        init(VERTEX_SHADER_DEFAULT, FRAGMENT_SHADER_DEFAULT);
+        ShaderProgramBuilder builder = new ShaderProgramBuilder();
+        builder.solidColor().matrix();
+        
+        init(builder.buildVertexShader(), builder.buildFragmentShader());
     }
+
 
     public ShaderProgram(String vertexShaderCode, String fragmentShaderCode) {
         init(vertexShaderCode, fragmentShaderCode);
@@ -18,8 +39,77 @@ public class ShaderProgram {
     protected void init(String vertexShaderCode, String fragmentShaderCode) {
         ids = createProgram(vertexShaderCode, fragmentShaderCode);
         idProgram = ids[0];
-
+        setupLocations();
     }
+
+    public void setupLocations() {
+        glUseProgram(idProgram);
+
+        for (int i = 0; i < matricesLocations.length; ++i) {
+            matricesLocations[i] = glGetUniformLocation(idProgram, U_MATRIX_NAMES[i]);
+        }
+
+        samplersLocations[0] = glGetUniformLocation(idProgram, U_SAMPLER_NAME);
+
+        for (int i = 1; i < samplersLocations.length; ++i) {
+            samplersLocations[i] = glGetUniformLocation(idProgram, U_SAMPLER_NAME + i);
+        }
+
+        solidColorLocation = glGetUniformLocation(idProgram, U_SOLID_COLOR_NAME);
+        light[0] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[0]);
+        light[1] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[1]);
+        light[2] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[2]);
+    }
+
+
+    public void use() {
+        glUseProgram(ids[0]);
+    }
+
+    public void uniformTexture(GlTexture texture) {
+        glActiveTexture(texture.textureUnit);
+        glBindTexture(texture.textureType, texture.idTexture);
+        int ind = texture.textureUnit - GL_TEXTURE0;
+        glUniform1i(samplersLocations[ind], ind);
+    }
+
+    public void uniformTexture(int idTexture) {
+        int samplerLocation = glGetUniformLocation(idProgram, "sampler");
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, idTexture);
+        glUniform1i(samplerLocation, 0);
+    }
+
+    public void uniformMatrix(Matrix4f m) {
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX], false, m.get(MATRIX_BUFFER));
+    }
+
+    public void uniformSolidColor(float[] color) {
+        glUniform4fv(solidColorLocation, color);
+    }
+
+    public void uniformMatrices(Matrices m) {
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX], false, m.matrix.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_NORMAL], false, m.normals.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_PROJECTION], false, m.projection.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_VIEW], false, m.camera.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_VIEW_MODEL], false, m.viewModel.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_MODEL], false, m.model.get(MATRIX_BUFFER));
+    }
+
+
+    public void uniformDirectionalLight(float[] ambient, float[] lightDiffuse, float[] lightDirection) {
+        glUniform3fv(light[0], ambient);
+        glUniform3fv(light[1], lightDiffuse);
+        glUniform3fv(light[2], lightDirection);
+    }
+
+    public void uniformDirectionalLight(Vector3f ambient, Vector3f lightDiffuse, Vector3f lightDirection) {
+        glUniform3f(light[0], ambient.x, ambient.y, ambient.z);
+        glUniform3f(light[1], lightDiffuse.x, lightDiffuse.y, lightDiffuse.z);
+        glUniform3f(light[2], lightDirection.x, lightDirection.y, lightDirection.z);
+    }
+
 
     public void dispose() {
         glDetachShader(ids[0], ids[1]);
@@ -29,7 +119,7 @@ public class ShaderProgram {
         glDeleteShader(ids[2]);
     }
 
-    public void delete(){
+    public void delete() {
         glDetachShader(idProgram, ids[1]);
         glDetachShader(idProgram, ids[2]);
         glDeleteProgram(ids[0]);
@@ -39,7 +129,7 @@ public class ShaderProgram {
         int idVertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
         int idFragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
 
-       return new int[] { linkProgram(idVertexShader, idFragmentShader), idVertexShader, idFragmentShader};
+        return new int[]{linkProgram(idVertexShader, idFragmentShader), idVertexShader, idFragmentShader};
     }
 
     public static int linkProgram(int idVertexShader, int idFragmentShader) {
@@ -68,35 +158,6 @@ public class ShaderProgram {
     }
 
 
-    public static final String VERTEX_SHADER_DEFAULT = "#version 330 core\n" +
-            "precision mediump float;\n" +
-            "layout(location=0) in vec4 vCoord;\n" +
-            "layout(location=1) in vec4 vColor ;\n" +
-            "layout(location=2) in vec3 vNormal;\n" +
-            "layout(location=3) in vec2 vTexCoord ;\n" +
-            "out vec4 exColor;\n" +
-            "out vec2 exTexCoord;\n"+
-            "uniform mat4 matrix;\n" +
-            "uniform vec4 uColor = vec4(-1.0, -1.0, -1.0, -1.0);\n" +
-            "void main() {\n" +
-            "    gl_Position = matrix  * vCoord;\n" +
-            "     if(uColor.w != -1.0) { exColor=uColor; } else {exColor=vColor;} \n"+
-
-            "    exTexCoord = vTexCoord;\n"+
-            "}";
-
-    public static final String FRAGMENT_SHADER_DEFAULT = "#version 330 core\n" +
-            "precision mediump float;\n"+
-            "in vec4 exColor;\n" +
-            "in vec2 exTexCoord;\n" +
-            "out vec4 fragColor;\n" +
-            "uniform int withTexture;\n"+
-            "uniform sampler2D texSampler;\n"+
-            "void main() {\n" +
-            "   " +
-            "if(withTexture==1) {fragColor = texture(texSampler, exTexCoord);}\n" +
-            "else {fragColor = exColor;}\n"+
-            "}\n";
 
 
     public static final String VERTEX_SHADER_120 = "#version 120 \n" +
@@ -105,7 +166,7 @@ public class ShaderProgram {
             "uniform mat4 matrix;\n" +
             "void main() {\n" +
             "    gl_Position = matrix  * vCoord;\n" +
-            "    exColor = vec4(1.0,1.0,1.0,1.0);\n"+
+            "    exColor = vec4(1.0,1.0,1.0,1.0);\n" +
             "}";
 
     public static final String FRAGMENT_SHADER_120 = "#version 120 \n" +

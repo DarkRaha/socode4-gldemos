@@ -1,23 +1,23 @@
 package com.darkraha.opengldemoj.renders;
 
-import com.darkraha.opengldemoj.gl.AppOGL;
-import com.darkraha.opengldemoj.gl.GlUtils;
-import com.darkraha.opengldemoj.gl.ShaderProgram;
-
-
+import com.darkraha.opengldemoj.gl.*;
 import org.joml.Matrix4f;
+
 import static org.lwjgl.opengl.GL33.*;
 
-
+/**
+ * Render textured quad. Demonstrate how to apply 2D texture to the surface.
+ * It uses class GlTexture, that has methods for loading graphic resources via STBI library.
+ */
 public class TexturedQuadRender extends Render {
 
-    private int idTexture;
+    private GlTexture texture;
     private int idVao;
     private int idVbo;
     protected Matrix4f matrix;
     private ShaderProgram prog;
-    private float rotY = 0;
-    private float rotX = 0;
+    private float rotY = 1.5f * TO_RAD;
+    private float rotX = TO_RAD;
 
     @Override
     public void onSetup(AppOGL appOGL) {
@@ -25,13 +25,18 @@ public class TexturedQuadRender extends Render {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
 
+        prog = new ShaderProgramBuilder()
+                .vertexAttributes(false, true, false)
+                .build();
 
-        prog = new ShaderProgram();
+        matrix = new Matrix4f()
+                .perspective(ALNGLE45, aspect, 1f, 100f)
+                .translate(0f, 0f, -6f);
+
         glUseProgram(prog.idProgram);
 
-        matrix = new Matrix4f();
+        texture = GlTexture.newTexture2D( "/textures/235.jpg", "test");
 
-        idTexture = GlUtils.loadTex2DResDefault(0,"/textures/235.jpg");
         idVao = GlUtils.createVAO();
         idVbo = GlUtils.createVBO(new float[]{
                 // coords         texture coords
@@ -49,38 +54,24 @@ public class TexturedQuadRender extends Render {
 
     @Override
     public void onDrawFrame(AppOGL appOGL) {
-
-        rotY += 1.5f * TO_RAD;
-        if (rotY > 2 * PI_F) {
-            rotY = rotY - 2 * PI_F;
-        }
-
-        rotX += 1f * TO_RAD;
-        if (rotX > 2 * PI_F) {
-            rotX = rotX - 2 * PI_F;
-        }
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(prog.idProgram);
-        glUniform1i(glGetUniformLocation(prog.idProgram, "withTexture"), 1);
-        glUniform4f(glGetUniformLocation(prog.idProgram, "uColor"), -1, -1, -1, -1);
 
-
-        int samplerLocation = glGetUniformLocation(prog.idProgram, "texSampler");
+        //-----------------------------------------------
+        // activate our texture
+        // you can use replace it by prog.uniformTexture(texture);
+        int samplerLocation = glGetUniformLocation(prog.idProgram, ShaderProgramBuilder.U_SAMPLER_NAME);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, idTexture);
+        glBindTexture(GL_TEXTURE_2D, texture.idTexture);
         glUniform1i(samplerLocation, 0);
 
-        matrix.identity()
-                .perspective(ALNGLE45, aspect, 1f, 100f)
-                .translate(0f, 0f, -6f)
-                .rotateAffineXYZ(rotX, rotY, 0);
+        matrix.rotateAffineXYZ(rotX, rotY, 0);
 
-        GlUtils.bindMatrix(prog.idProgram, matrix);
+        prog.uniformMatrix(matrix);
         glBindVertexArray(idVao);
 
-       // glEnable(GL_CULL_FACE);
+        // glEnable(GL_CULL_FACE);
         glDrawArrays(GL_TRIANGLES, 0, 6); // vertex count
     }
 
@@ -88,7 +79,7 @@ public class TexturedQuadRender extends Render {
     public void onDispose(AppOGL appOGL) {
         glUseProgram(0);
         prog.dispose();
-        glDeleteTextures(idTexture);
+        texture.dispose();
         glDeleteVertexArrays(idVao);
         glDeleteBuffers(idVbo);
     }

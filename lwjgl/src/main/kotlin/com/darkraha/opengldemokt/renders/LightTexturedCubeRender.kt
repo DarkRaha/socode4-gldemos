@@ -38,6 +38,10 @@ class LightTexturedCubeRender : Render() {
             .exchangeData(false, true, true)
             .build()
         prog = ShaderProgram(vertexShader, fragmentShader)
+
+
+
+
         glUseProgram(prog!!.idProgram)
         matrix = Matrix4f()
         projMatrix = Matrix4f()
