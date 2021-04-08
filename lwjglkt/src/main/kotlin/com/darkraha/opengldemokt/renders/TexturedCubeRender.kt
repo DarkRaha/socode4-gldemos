@@ -42,13 +42,21 @@ class TexturedCubeRender : Render() {
         glGenerateMipmap(idTexture)
     }
 
+    override fun onSurfaceChanged(appOGL: AppOGL, width: Int, height: Int) {
+        super.onSurfaceChanged(appOGL, width, height)
+        matrix.identity()
+            .perspective(45 * TO_RAD, aspect, 1f, 100f)
+            .translate(0f, 0f, -6f)
+    }
+
+
     override fun onDrawFrame(appOGL: AppOGL) {
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
         glUseProgram(prog.idProgram)
         matrix.rotateAffineXYZ(rotX, rotY, 0f)
         prog.uniformTexture(idTexture)
         prog.uniformMatrix(matrix)
-       // glEnable(GL_CULL_FACE)
+        // glEnable(GL_CULL_FACE)
         cube.draw()
     }
 

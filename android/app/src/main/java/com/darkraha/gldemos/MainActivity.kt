@@ -33,11 +33,13 @@ class MainActivity : AppCompatActivity() {
         glSurfaceView = GLSurfaceView(this)
         glSurfaceView.setEGLContextClientVersion(3)
 
-        render = LightTexturedCubeRender(this)
-        //render = TexturedQuadRender(this)
         // render = QuadRender()
         // render = ColoredQuadRender()
-        //render = ColoredCubeRender()
+       //  render = ColoredCubeRender()
+       // render = TexturedQuadRender(this)
+      // render = TexturedCubeRender(this)
+        // render = LightTexturedCubeRender(this)
+        render = LightTexturedSphereRender()
         glSurfaceView.setRenderer(render)
         setContentView(glSurfaceView)
     }

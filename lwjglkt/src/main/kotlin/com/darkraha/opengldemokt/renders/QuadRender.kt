@@ -112,6 +112,5 @@ class QuadRender : Render() {
         prog.dispose()
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         glDeleteBuffers(idVbo)
-        super.onDispose(appOGL)
     }
 }

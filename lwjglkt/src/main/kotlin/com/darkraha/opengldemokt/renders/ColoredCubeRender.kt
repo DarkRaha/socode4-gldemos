@@ -94,6 +94,8 @@ class ColoredCubeRender : Render() {
             3, GL_FLOAT, false, stride, colorOffset.toLong()
         )
 
+        //--------------------------------------------------
+        // create IBO and upload data into it
         MemoryStack.stackPush().use { stack ->
             val byteBuffer = stack.malloc(indices.size)
             byteBuffer.put(indices).flip()

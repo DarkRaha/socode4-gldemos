@@ -51,6 +51,11 @@ class TexturedQuadRender : Render() {
         GlUtils.bindAttributes(idVbo, 2, 0, true)
     }
 
+    override fun onSurfaceChanged(appOGL: AppOGL, width: Int, height: Int) {
+        super.onSurfaceChanged(appOGL, width, height)
+        matrix.identity().perspective(ALNGLE45, aspect, 1f, 100f)
+    }
+
     override fun onDrawFrame(appOGL: AppOGL) {
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 

@@ -1,4 +1,4 @@
-package com.darkraha.opengldemokt.gl
+package com.darkraha.gldemos.gl
 
 import java.lang.StringBuilder
 
@@ -44,7 +44,7 @@ class ShaderProgramBuilder {
         "uniform vec3 lightDiffuse;\n",
         "uniform vec3 lightDirection;\n"
     )
-    private var version = "330 core"
+    private var version = "300 es"
     private var precisionFloat = "mediump"
     private fun buildDeclareVertexLight(sb: StringBuilder) {
         when (lightType) {
@@ -98,7 +98,7 @@ class ShaderProgramBuilder {
     }
 
     private val calcPositionV: String
-         get() = if (useMatrices[IND_MATRIX]) {
+        get() = if (useMatrices[IND_MATRIX]) {
             "    gl_Position = m  * vPos;\n"
         } else if (useMatrices[IND_MATRIX_VIEW_MODEL]) {
             "    gl_Position = mP  * mVM * vPos;\n"
@@ -108,7 +108,7 @@ class ShaderProgramBuilder {
             ""
         }
     private val calcColorV: String
-         get() {
+        get() {
             if (useInputData[IND_VERTEX_COLOR]) {
                 return "exColor = vColor;\n"
             } else if (useSolidColor) {
@@ -278,8 +278,6 @@ class ShaderProgramBuilder {
         const val A_LOCATION_VERTEX_COLOR = 1
         const val A_LOCATION_VERTEX_NORMAL = 2
         const val A_LOCATION_VERTEX_TEXPOS = 3
-        const val A_LOCATION_VERTEX_TANGENT = 4
-        const val A_LOCATION_VERTEX_BITANGENT = 5
         const val IND_VERTEX_POS = 0
         const val IND_VERTEX_COLOR = 1
         const val IND_VERTEX_NORMAL = 2

@@ -23,13 +23,13 @@ class OpenGLKt {
         fun main(args: Array<String>) {
 
             // AppOGL.isV120 = true; AppOGL(QuadRender(), 300, 300) // rejected
-            //AppOGL(QuadRender(), 300, 300)
+             //AppOGL(QuadRender(), 300, 300)
             // AppOGL(ColoredQuadRender(), 300, 300)
-            // AppOGL(ColoredCubeRender(), 300, 300)
+             AppOGL(ColoredCubeRender(), 300, 300)
             // AppOGL(TexturedQuadRender(), 300, 300)
             // AppOGL(TexturedCubeRender(), 300, 300)
-           // AppOGL(LightTexturedCubeRender(), 300, 300)
-            AppOGL(LightTexturedSphereRender(), 300, 300)
+            // AppOGL(LightTexturedCubeRender(), 300, 300)
+           // AppOGL(LightTexturedSphereRender(), 300, 300)
 
         }
     }

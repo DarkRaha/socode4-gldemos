@@ -1,14 +1,30 @@
 package com.darkraha.gldemos.gl
 
+
 import android.opengl.GLES30.*
+import org.joml.Matrix4f
+import org.joml.Vector3f
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class ShaderProgram {
     private lateinit var ids: IntArray
     val idProgram
         get() = ids[0]
 
+    private val matricesLocations = IntArray(ShaderProgramBuilder.U_MATRIX_NAMES.size)
+    private val samplersLocations = IntArray(8)
+    private val light = IntArray(3)
+    private val normalLocation = 0
+
+    var solidColorLocation = 0
+        private set
+
     constructor() {
-        init(VERTEX_SHADER_DEFAULT, FRAGMENT_SHADER_DEFAULT)
+        val builder = ShaderProgramBuilder()
+        builder.solidColor().matrix()
+
+        init(builder.buildVertexShader(), builder.buildFragmentShader())
     }
 
     constructor(vertexShaderCode: String, fragmentShaderCode: String) {
@@ -17,6 +33,94 @@ class ShaderProgram {
 
     protected fun init(vertexShaderCode: String, fragmentShaderCode: String) {
         ids = createProgram(vertexShaderCode, fragmentShaderCode)
+        setupLocations()
+    }
+
+    fun setupLocations() {
+        glUseProgram(idProgram)
+        for (i in matricesLocations.indices) {
+            matricesLocations[i] = glGetUniformLocation(
+                idProgram,
+                ShaderProgramBuilder.U_MATRIX_NAMES[i]
+            )
+        }
+        samplersLocations[0] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SAMPLER_NAME)
+        for (i in 1 until samplersLocations.size) {
+            samplersLocations[i] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SAMPLER_NAME + i)
+        }
+        solidColorLocation = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SOLID_COLOR_NAME)
+        light[0] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[0])
+        light[1] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[1])
+        light[2] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[2])
+    }
+
+    fun use() {
+        glUseProgram(ids[0])
+    }
+
+    fun uniformTexture(texture: GlTexture) {
+        glActiveTexture(texture.textureUnit)
+        glBindTexture(texture.textureType, texture.idTexture)
+        val ind = texture.textureUnit - GL_TEXTURE0
+        glUniform1i(samplersLocations[ind], ind)
+    }
+
+    fun uniformTexture(idTexture: Int) {
+        val samplerLocation = glGetUniformLocation(idProgram, "sampler")
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, idTexture)
+        glUniform1i(samplerLocation, 0)
+    }
+
+    fun uniformMatrix(m: Matrix4f) {
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX], 1,false,
+            m[MATRIX_BUFFER]
+        )
+    }
+
+    fun uniformSolidColor(color: FloatArray) {
+        glUniform4fv(solidColorLocation, 3,color,0)
+    }
+
+    fun uniformMatrices(m: Matrices) {
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX], 1, false,
+            m.matrix[MATRIX_BUFFER]
+        )
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX_NORMAL], 1, false,
+            m.normals[MATRIX_BUFFER]
+        )
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX_PROJECTION], 1, false,
+            m.projection[MATRIX_BUFFER]
+        )
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX_VIEW], 1, false,
+            m.camera[MATRIX_BUFFER]
+        )
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX_VIEW_MODEL], 1, false,
+            m.viewModel[MATRIX_BUFFER]
+        )
+        glUniformMatrix4fv(
+            matricesLocations[ShaderProgramBuilder.IND_MATRIX_MODEL], 1, false,
+            m.model[MATRIX_BUFFER]
+        )
+    }
+
+
+    fun uniformDirectionalLight(ambient: FloatArray, lightDiffuse: FloatArray, lightDirection: FloatArray) {
+        glUniform3fv(light[0], 3, ambient, 0)
+        glUniform3fv(light[1], 3, lightDiffuse, 0)
+        glUniform3fv(light[2], 3, lightDirection, 0)
+    }
+
+    fun uniformDirectionalLight(ambient: Vector3f, lightDiffuse: Vector3f, lightDirection: Vector3f) {
+        glUniform3f(light[0], ambient.x, ambient.y, ambient.z)
+        glUniform3f(light[1], lightDiffuse.x, lightDiffuse.y, lightDiffuse.z)
+        glUniform3f(light[2], lightDirection.x, lightDirection.y, lightDirection.z)
     }
 
     fun dispose() {
@@ -34,6 +138,9 @@ class ShaderProgram {
     }
 
     companion object {
+        val MATRIX_BUFFER = ByteBuffer.allocateDirect(16 * 4)
+            .order(ByteOrder.nativeOrder()).asFloatBuffer()
+
         fun createProgram(vertexShaderSource: String, fragmentShaderSource: String): IntArray {
             val idVertexShader: Int = compileShader(GL_VERTEX_SHADER, vertexShaderSource)
             val idFragmentShader: Int =

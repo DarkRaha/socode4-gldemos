@@ -1,28 +1,20 @@
 package com.darkraha.gldemos.renders
 
-import android.content.Context
-import org.joml.Matrix4f
 import android.opengl.GLES30.*
 import com.darkraha.gldemos.R
 import com.darkraha.gldemos.gl.*
 import com.darkraha.gldemos.gl.modelling.Models
+import org.joml.Matrix4f
 import org.joml.Vector3f
-
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-/**
- * Render textured cube with ambient light and single remote directional light (like sun).
- * Light direction and model normals must be normalized.
- */
-class LightTexturedCubeRender(private val context: Context) : Render() {
-
-    private val matrices = Matrices()
-    private lateinit var prog: ShaderProgram
-    private val cube = GlObject()
-
+class LightTexturedSphereRender : Render() {
     private val rotY = 1.5f * GlCommon.TO_RAD
     private val rotX = GlCommon.TO_RAD
+    private val matrices = Matrices()
+    private lateinit var prog: ShaderProgram
+    private val sphere = GlObject()
 
     val lightAmbient = Vector3f(0.6f, 0.6f, 0.6f)
     val lightDiffuse = Vector3f(1.0f, 1.0f, 1.0f)
@@ -30,18 +22,24 @@ class LightTexturedCubeRender(private val context: Context) : Render() {
 
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
+        prog = ShaderProgramBuilder()
+            .lightDirectional()
+            .vertexAttributes(false, true, true)
+            .matrix(true)
+            .build()
+
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         glEnable(GL_DEPTH_TEST)
-        prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, true)
-            .lightDirectional()
-            .normalMatrix()
-            .matrix()
-            .build()
-        glUseProgram(prog.idProgram)
-        cube.model = Models.cube(1f, 1f, 1f, "cube-0").toGlModel()
-        cube.texture = GlTexture.newTexture2D(R.drawable.t235, "name")
-        cube.transforms = Matrix4f().translate(0f, 0f, -6f)
+
+        sphere.model = Models.sphere(
+            1f,
+            36, 36,
+            1f, 0.5f, 0.5f,
+            "sphere-0"
+        ).toGlModel()
+        sphere.transforms = Matrix4f()
+        sphere.transforms!!.translate(0f, 0f, -6f)
+        sphere.texture = GlTexture.newTexture2D(R.drawable.texture, "terra-0")
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -49,23 +47,24 @@ class LightTexturedCubeRender(private val context: Context) : Render() {
         matrices.projection.identity().perspective(GlCommon.ALNGLE45, aspect, 1f, 100f)
     }
 
-
-
     override fun onDrawFrame(arg0: GL10?) {
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-        glUseProgram(prog.idProgram)
 
-        cube.transforms!!.rotateAffineXYZ(rotX, rotY, 0f)
-        matrices.applyModel(cube.transforms!!)
+        sphere.transforms!!.rotateAffineXYZ(rotX, rotY, 0f)
+        matrices.applyModel(sphere.transforms!!)
+
+        prog.use()
         prog.uniformMatrices(matrices)
-        prog.uniformTexture(cube.texture!!)
+        prog.uniformTexture(sphere.texture!!)
         prog.uniformDirectionalLight(lightAmbient, lightDiffuse, lightDirection)
-        cube.model!!.draw()
+
+        // glEnable(GL_CULL_FACE);
+        sphere.model!!.draw()
     }
 
     override fun onDispose() {
-        prog.dispose()
-        cube.model!!.dispose()
-        cube.texture!!.dispose()
+       prog.dispose()
+        sphere.model!!.dispose()
+        sphere.texture!!.dispose()
     }
 }

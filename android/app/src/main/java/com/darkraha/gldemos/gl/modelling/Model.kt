@@ -1,16 +1,13 @@
-package com.darkraha.opengldemokt.gl.modelling
+package com.darkraha.gldemos.gl.modelling
 
-
-
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
+import android.opengl.GLES30.*
+import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
+import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
+import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
+import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
 import org.joml.Vector3f
-import org.lwjgl.opengl.GL33.*
-import org.lwjgl.system.MemoryStack
-
-
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Contains the vertex data of model in different arrays.
@@ -32,7 +29,10 @@ class Model private constructor() {
     var drawType = GL_TRIANGLES
 
     fun toGlModel(): GlModel {
-        val idVao = glGenVertexArrays()
+        val id = intArrayOf(0)
+
+        glGenVertexArrays(1, id, 0)
+        val idVao = id[0]
         glBindVertexArray(idVao)
 
         var idIbo = 0
@@ -67,42 +67,48 @@ class Model private constructor() {
         val edge2 = Vector3f()
     }
 
-
-    companion object{
+    //--------------------------------------------------------------
+    companion object {
 
         fun createIBO(data: IntArray): Int {
-            MemoryStack.stackPush().use { stack ->
-                val byteBuffer = stack.malloc(data.size * 4).asIntBuffer()
-                byteBuffer.put(data).flip()
-                val idIbo = glGenBuffers()
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW)
-                return idIbo
-            }
+
+            val buffer = ByteBuffer.allocateDirect(data.size * 4)
+                .order(ByteOrder.nativeOrder()).asIntBuffer()
+            buffer.put(data).position(0)
+
+            val idArray = intArrayOf(0)
+            glGenBuffers(1, idArray, 0)
+            val idIbo = idArray[0]
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size*4, buffer, GL_STATIC_DRAW)
+            return idIbo
         }
 
         fun createVBO(data: FloatArray, locations: Int, size: Int): Int {
-            MemoryStack.stackPush().use { stack ->
-                val idVbo = glGenBuffers()
-                glBindBuffer(GL_ARRAY_BUFFER, idVbo)
-                val fb = stack.mallocFloat(data.size)
-                fb.put(data).flip()
-                glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW)
-                glEnableVertexAttribArray(locations)
-                glVertexAttribPointer(
-                    locations,
-                    size, GL_FLOAT, false,
-                    0, 0
-                )
-                return idVbo
-            }
-        }
 
+            val buffer = ByteBuffer.allocateDirect(data.size * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer()
+
+            val idArray = intArrayOf(0)
+            glGenBuffers(1, idArray, 0)
+            val idVbo = idArray[0]
+            glBindBuffer(GL_ARRAY_BUFFER, idVbo)
+            buffer.put(data).position(0)
+            glBufferData(GL_ARRAY_BUFFER, data.size * 4, buffer, GL_STATIC_DRAW)
+
+            glEnableVertexAttribArray(locations)
+            glVertexAttribPointer(
+                locations,
+                size, GL_FLOAT, false,
+                0, 0
+            )
+
+            return idVbo
+        }
     }
 
-
-
-
+    //--------------------------------------------------------------
     class Builder {
         private val model = Model()
 
@@ -176,4 +182,6 @@ class Model private constructor() {
             return model
         }
     }
+
+
 }

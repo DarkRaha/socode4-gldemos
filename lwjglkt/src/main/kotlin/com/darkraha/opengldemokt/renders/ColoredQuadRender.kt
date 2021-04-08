@@ -57,6 +57,8 @@ class ColoredQuadRender : Render() {
         idVao = glGenVertexArrays()
         glBindVertexArray(idVao)
 
+        //-----------------------------------------------
+        // create VBO and upload data into it
         MemoryStack.stackPush().use { stack ->
             idVbo = glGenBuffers()
             glBindBuffer(GL_ARRAY_BUFFER, idVbo)
@@ -87,7 +89,7 @@ class ColoredQuadRender : Render() {
     }
 
     override fun onDrawFrame(appOGL: AppOGL) {
-        super.onDrawFrame(appOGL)
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
         glUseProgram(prog.idProgram)
         glBindVertexArray(idVao)
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)

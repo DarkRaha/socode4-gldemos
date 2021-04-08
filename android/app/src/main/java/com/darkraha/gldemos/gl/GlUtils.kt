@@ -4,32 +4,22 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES30.*
 import android.opengl.GLUtils
-import org.joml.Matrix4f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import android.graphics.BitmapFactory
-import android.opengl.GLES20
+
+
 
 
 object GlUtils {
 
-    private val MATRIX_BUFFER = ByteBuffer.allocateDirect(16 * 4)
-        .order(ByteOrder.nativeOrder()).asFloatBuffer()
     private var FLOAT_BUFFER: FloatBuffer = ByteBuffer.allocateDirect(100 * 4)
         .order(ByteOrder.nativeOrder()).asFloatBuffer()
+
     private var BYTE_BUFFER: ByteBuffer = ByteBuffer.allocateDirect(100)
     private val ID_ARRAY = intArrayOf(0)
 
-    const val A_LOCATION_COORDS = 0
-    const val A_LOCATION_COLORS = 1
-    const val A_LOCATION_NORMALS = 2
-    const val A_LOCATION_TEXCOORDS = 3
-    const val U_MATRIX = "matrix"
-    const val U_PROJ_MATRIX = "projMatrix"
-    const val U_VIEW_MATRIX = "viewMatrix"
-    const val U_MODEL_MATRIX = "modelMatrix"
-    const val U_NORMAL_MATRIX = "normalMatrix"
 
     fun createTexture(idTex: Int, imageData: Bitmap): Int {
 
@@ -97,65 +87,27 @@ object GlUtils {
         // size of float is 4
         val stride = 4 * (numCoords + numColorComponents + if (texCoord) 2 else 0)
         if (numCoords > 0) {
-            glEnableVertexAttribArray(A_LOCATION_COORDS)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_POS)
             glVertexAttribPointer(
-                A_LOCATION_COORDS,
+                ShaderProgramBuilder.A_LOCATION_VERTEX_POS,
                 numCoords, GL_FLOAT, false,
                 stride, 0
             )
         }
         if (numColorComponents > 0) {
-            glEnableVertexAttribArray(A_LOCATION_COLORS)
+            glEnableVertexAttribArray(  ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR)
             glVertexAttribPointer(
-                A_LOCATION_COLORS,
+                ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR,
                 numColorComponents, GL_FLOAT, true,
                 stride, 4 * numCoords
             )
         }
         if (texCoord) {
-            glEnableVertexAttribArray(A_LOCATION_TEXCOORDS)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS)
             glVertexAttribPointer(
-                A_LOCATION_TEXCOORDS,
+                ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS,
                 2, GL_FLOAT, false,
                 stride, 4 * (numCoords + numColorComponents)
-            )
-        }
-    }
-
-    fun bindMatrix(idProgram: Int, matrix: Matrix4f) {
-        glUniformMatrix4fv(
-            glGetUniformLocation(idProgram, U_MATRIX), 1,
-            false, matrix[MATRIX_BUFFER]
-        )
-    }
-
-    fun bindNormalMatrix(idProgram: Int, matrix: Matrix4f) {
-        glUniformMatrix4fv(
-            glGetUniformLocation(idProgram, U_NORMAL_MATRIX),1,
-            false, matrix[MATRIX_BUFFER]
-        )
-    }
-
-    fun bindMatrices(idProgram: Int, projMatrix: Matrix4f?, viewMatrix: Matrix4f?, modelMatrix: Matrix4f?) {
-
-        projMatrix?.apply {
-            glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_PROJ_MATRIX), 1,
-                false, this[MATRIX_BUFFER]
-            )
-        }
-
-        viewMatrix?.apply {
-            glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_VIEW_MATRIX), 1,
-                false, this[MATRIX_BUFFER]
-            )
-        }
-
-        modelMatrix?.apply {
-            glUniformMatrix4fv(
-                glGetUniformLocation(idProgram, U_MODEL_MATRIX), 1,
-                false, this[MATRIX_BUFFER]
             )
         }
     }
@@ -180,26 +132,26 @@ object GlUtils {
 
         if (coords != null) {
             ret[0] = createVBO(coords)
-            glEnableVertexAttribArray(A_LOCATION_COORDS)
-            glVertexAttribPointer( A_LOCATION_COORDS,3, GL_FLOAT, false,0, 0)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_POS)
+            glVertexAttribPointer( ShaderProgramBuilder.A_LOCATION_VERTEX_POS,3, GL_FLOAT, false,0, 0)
         }
         if (colors != null) {
             ret[1] = createVBO(colors)
-            glEnableVertexAttribArray(A_LOCATION_COLORS)
-            glVertexAttribPointer( A_LOCATION_COLORS,4, GL_FLOAT, false,0, 0)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR)
+            glVertexAttribPointer( ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR,4, GL_FLOAT, false,0, 0)
         }
         if (texcoords != null) {
             ret[2] = createVBO(texcoords)
-            glEnableVertexAttribArray(A_LOCATION_TEXCOORDS)
-            glVertexAttribPointer(A_LOCATION_TEXCOORDS,2, GL_FLOAT, false,0, 0)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS)
+            glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS,2, GL_FLOAT, false,0, 0)
         }
         if (indices != null) {
             ret[3] = createIBO(indices)
         }
         if (normals != null) {
             ret[4] = createVBO(normals)
-            glEnableVertexAttribArray(A_LOCATION_NORMALS)
-            glVertexAttribPointer(A_LOCATION_NORMALS, 3, GL_FLOAT, false, 0, 0)
+            glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL)
+            glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL, 3, GL_FLOAT, false, 0, 0)
         }
 
         return ret

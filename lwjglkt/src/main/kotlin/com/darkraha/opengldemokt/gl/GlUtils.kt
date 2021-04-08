@@ -82,24 +82,6 @@ object GlUtils {
     }
 
 
-    fun createVBO(data: FloatArray, locations: Int, size: Int): Int {
-        MemoryStack.stackPush().use { stack ->
-            val idVbo = glGenBuffers()
-            glBindBuffer(GL_ARRAY_BUFFER, idVbo)
-            val fb = stack.mallocFloat(data.size)
-            fb.put(data).flip()
-            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW)
-            glEnableVertexAttribArray(locations)
-            glVertexAttribPointer(
-                locations,
-                size, GL_FLOAT, false,
-                0, 0
-            )
-            return idVbo
-        }
-    }
-
-
     /**
      * @param coords    x,y,z
      * @param colors    r,g,b,a
@@ -170,18 +152,6 @@ object GlUtils {
     fun createIBO(data: ByteArray): Int {
         MemoryStack.stackPush().use { stack ->
             val byteBuffer = stack.malloc(data.size)
-            byteBuffer.put(data).flip()
-            val idIbo = glGenBuffers()
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW)
-            return idIbo
-        }
-    }
-
-
-    fun createIBO(data: IntArray): Int {
-        MemoryStack.stackPush().use { stack ->
-            val byteBuffer = stack.malloc(data.size * 4).asIntBuffer()
             byteBuffer.put(data).flip()
             val idIbo = glGenBuffers()
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo)

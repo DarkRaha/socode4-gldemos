@@ -1,7 +1,5 @@
-package com.darkraha.opengldemokt.gl.modelling
-
-
-import org.lwjgl.opengl.GL33.*
+package com.darkraha.gldemos.gl.modelling
+import android.opengl.GLES30.*
 
 class GlModel(
     val idVao: Int,
@@ -11,9 +9,9 @@ class GlModel(
     val count: Int,
     val name: String
 ) {
+
     constructor(idVao: Int, ids: IntArray, drawType: Int, count: Int, name: String)
             : this(idVao, ids, 0, drawType, count, name)
-
 
     fun draw() {
         glBindVertexArray(idVao)
@@ -25,8 +23,7 @@ class GlModel(
     }
 
     fun dispose() {
-        glDeleteVertexArrays(ids[0])
-        ids[0] = 0
-        glDeleteBuffers(ids)
+        glDeleteVertexArrays(1, intArrayOf(idVao), 0)
+        glDeleteBuffers(ids.size, ids,0)
     }
 }
