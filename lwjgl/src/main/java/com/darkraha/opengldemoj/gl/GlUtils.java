@@ -1,14 +1,10 @@
 package com.darkraha.opengldemoj.gl;
 
-import com.sun.prism.Texture;
-import de.matthiasmann.twl.utils.PNGDecoder;
-import org.joml.Matrix4f;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
+
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

@@ -27,7 +27,7 @@ public class ShaderProgram {
     public ShaderProgram() {
         ShaderProgramBuilder builder = new ShaderProgramBuilder();
         builder.solidColor().matrix();
-        
+
         init(builder.buildVertexShader(), builder.buildFragmentShader());
     }
 

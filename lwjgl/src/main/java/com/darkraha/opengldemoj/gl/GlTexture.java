@@ -43,7 +43,7 @@ public class GlTexture {
     }
 
 
-    public static GlTexture newSolidColorTexture(String name, int r, int g, int b) {
+    public static GlTexture newSolidColorTexture(int r, int g, int b, String name) {
         int level = 0;
         int width = 1;
         int height = 1;

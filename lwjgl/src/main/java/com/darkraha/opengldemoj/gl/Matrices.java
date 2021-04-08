@@ -1,11 +1,6 @@
 package com.darkraha.opengldemoj.gl;
 
 import org.joml.Matrix4f;
-import org.lwjgl.system.MemoryUtil;
-
-import java.nio.FloatBuffer;
-
-import static com.darkraha.opengldemoj.gl.GlUtils.*;
 
 public class Matrices {
 

@@ -20,9 +20,9 @@ public class Model {
     public float[] vBitangent;
     public int[] indices;
     public  float[] color;
-    public int coordComponets;
+    public int posComponets;
     public int colorComponets;
-    public int texCoordComponets;
+    public int texPosComponets;
     public int normalComponets;
     public int drawType = GL33.GL_TRIANGLES;
 
@@ -37,20 +37,20 @@ public class Model {
 
         ids[0] = glGenVertexArrays();
         glBindVertexArray(ids[0]);
-        ids[1] = GlUtils.createVBO(vPos, GlUtils.A_LOCATION_COORDS, coordComponets);
+        ids[1] = GlUtils.createVBO(vPos, GlUtils.A_LOCATION_COORDS, posComponets);
         ids[2] = vColor != null ? GlUtils.createVBO(vColor, GlUtils.A_LOCATION_COLORS, colorComponets) : 0;
         ids[3] = vNormal != null ? GlUtils.createVBO(vNormal, GlUtils.A_LOCATION_NORMALS, normalComponets) : 0;
-        ids[4] = vTexPos != null ? GlUtils.createVBO(vTexPos, GlUtils.A_LOCATION_TEXCOORDS, texCoordComponets) : 0;
+        ids[4] = vTexPos != null ? GlUtils.createVBO(vTexPos, GlUtils.A_LOCATION_TEXCOORDS, texPosComponets) : 0;
         ids[5] = indices != null ? GlUtils.createIBO(indices) : 0;
 
-        int count = vPos.length / coordComponets;
+        int count = vPos.length / posComponets;
 
         if (indices != null) {
             count = indices.length;
         }
 
         glBindVertexArray(0);
-        return new GlModel(name, ids, drawType, count);
+        return new GlModel(ids, drawType, count, name);
     }
 
     public void calcTangent(){
@@ -68,13 +68,13 @@ public class Model {
 
         public Builder coordinates(float[] coords) {
             model.vPos = coords;
-            model.coordComponets = 3;
+            model.posComponets = 3;
             return this;
         }
 
         public Builder coordinates2d(float[] coords) {
             model.vPos = coords;
-            model.coordComponets = 2;
+            model.posComponets = 2;
             return this;
         }
 
@@ -86,19 +86,19 @@ public class Model {
 
         public Builder textureCoordinates(float[] st) {
             model.vTexPos = st;
-            model.texCoordComponets=2;
+            model.texPosComponets =2;
             return this;
         }
 
         public Builder textureCoordinates3(float[] st) {
             model.vTexPos = st;
-            model.texCoordComponets=3;
+            model.texPosComponets =3;
             return this;
         }
 
         public Builder textureCoordinates4(float[] st) {
             model.vTexPos = st;
-            model.texCoordComponets=4;
+            model.texPosComponets =4;
             return this;
         }
 

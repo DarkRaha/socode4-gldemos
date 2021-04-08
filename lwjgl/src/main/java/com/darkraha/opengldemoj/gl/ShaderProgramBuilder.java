@@ -88,13 +88,13 @@ public class ShaderProgramBuilder {
 
     private int lightType = -1;
 
-    private final String[] exchangeDataVS_OUT = new String[]{
+    private final String[] exchangeDataVS = new String[]{
             "out vec4 exColor;\n",
             "out vec2 exTexPos;\n",
             "out vec3 exLighting;\n"
     };
 
-    private final String[] exchangeDataFS_IN = new String[]{
+    private final String[] exchangeDataFS = new String[]{
             "in vec4 exColor;\n",
             "in vec2 exTexPos;\n",
             "in vec3 exLighting;\n"
@@ -123,7 +123,7 @@ public class ShaderProgramBuilder {
                     sb.append(s);
                 }
 
-                sb.append(exchangeDataVS_OUT[IND_EXCHANGE_LIGHT]);
+                sb.append(exchangeDataVS[IND_EXCHANGE_LIGHT]);
                 break;
 
             // TODO
@@ -261,11 +261,11 @@ public class ShaderProgramBuilder {
         }
 
         if (useSolidColor || useInputData[IND_VERTEX_COLOR]) {
-            sb.append(exchangeDataVS_OUT[IND_EXCHANGE_COLOR]);
+            sb.append(exchangeDataVS[IND_EXCHANGE_COLOR]);
         }
 
         if (useInputData[IND_VERTEX_TEX_POS]) {
-            sb.append(exchangeDataVS_OUT[IND_EXCHANGE_TEX_POS]);
+            sb.append(exchangeDataVS[IND_EXCHANGE_TEX_POS]);
         }
 
         buildAddVertexFunctions(sb);
@@ -288,16 +288,16 @@ public class ShaderProgramBuilder {
         sb.append("out vec4 fragColor;\n");
 
         if (useSolidColor || useInputData[IND_VERTEX_COLOR]) {
-            sb.append(exchangeDataFS_IN[IND_EXCHANGE_COLOR]);
+            sb.append(exchangeDataFS[IND_EXCHANGE_COLOR]);
         }
 
         if (useInputData[IND_VERTEX_TEX_POS]) {
-            sb.append(exchangeDataFS_IN[IND_EXCHANGE_TEX_POS]);
+            sb.append(exchangeDataFS[IND_EXCHANGE_TEX_POS]);
             sb.append(samplerDeclaration[0]);
         }
 
         if (lightType == 0) {
-            sb.append(exchangeDataFS_IN[IND_EXCHANGE_LIGHT]);
+            sb.append(exchangeDataFS[IND_EXCHANGE_LIGHT]);
         }
 
         sb.append("void main() {\n");

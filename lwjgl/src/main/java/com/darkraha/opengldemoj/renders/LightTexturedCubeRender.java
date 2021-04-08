@@ -5,9 +5,12 @@ import com.darkraha.opengldemoj.gl.modelling.Models;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-
 import static org.lwjgl.opengl.GL33.*;
 
+/**
+ * Render textured cube with ambient light and single remote directional light (like sun).
+ * Light direction and model normals must be normalized.
+ */
 public class LightTexturedCubeRender extends Render {
     private final Matrices matrices = new Matrices();
     private GlObject cube = new GlObject();

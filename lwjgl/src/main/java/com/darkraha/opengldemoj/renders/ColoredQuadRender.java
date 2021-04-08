@@ -71,7 +71,6 @@ public class ColoredQuadRender extends Render {
 
         //-----------------------------------------------
         // specify locations of attributes in data
-
         int stride = 4 * (2 + 3); // 4 - size of float in bytes, 2 - x,y, 3 - r,g,b
         glEnableVertexAttribArray(ShaderProgramBuilder.A_LOCATION_VERTEX_POS);
         glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_POS,
@@ -83,7 +82,7 @@ public class ColoredQuadRender extends Render {
         glVertexAttribPointer(ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR,
                 3, GL_FLOAT, false, stride, colorOffset);
 
-        glBindVertexArray(0);
+        glBindVertexArray(0); // deactivate VAO
     }
 
 

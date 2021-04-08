@@ -41,9 +41,13 @@ public class QuadRender extends Render {
                 -1.0f, -1.0f,
                 1.0f, -1.0f};
 
+        //-----------------------------------------------
+        // create VAO and activate it
         idVao = glGenVertexArrays();
         glBindVertexArray(idVao);
 
+        //-----------------------------------------------
+        // create VBO and upload data into it
         try (MemoryStack stack = MemoryStack.stackPush()) {
             idVbo = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, idVbo);
@@ -53,12 +57,26 @@ public class QuadRender extends Render {
             glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
         }
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                2, GL_FLOAT, false,
-                0, 0);
+        //-----------------------------------------------
+        // specify locations of attribute in data
 
-        glBindVertexArray(0);
+        // 0 means  attribute tightly packed in the array
+        int stride  = 0;
+
+        // 0 because in data only one attribute packed
+        int offset =0;
+
+        // we specified location of position attribute in shader to 0
+        int posAttributeLocation = 0;
+
+        // we use only x,y coordinates for vertex position (z=0 by default)
+        int size = 2;
+
+        glEnableVertexAttribArray(posAttributeLocation);
+        glVertexAttribPointer(posAttributeLocation,size, GL_FLOAT, false,
+                stride, offset);
+
+        glBindVertexArray(0); // deactivate vao
     }
 
 

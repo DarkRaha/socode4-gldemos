@@ -1,9 +1,7 @@
 package com.darkraha.opengldemoj.gl.modelling;
 
 
-import com.darkraha.opengldemoj.gl.GlTexture;
-import com.darkraha.opengldemoj.gl.ShaderProgram;
-import org.joml.Matrix4f;
+
 
 import static org.lwjgl.opengl.GL33.*;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
@@ -21,7 +19,7 @@ public class GlModel {
     public final int drawType;
     public final int count;
 
-    public GlModel(String name, int[] ids, int drawType, int count) {
+    public GlModel(int[] ids, int drawType, int count,String name) {
         this.name = name;
         this.ids = ids;
         this.drawType = drawType;
