@@ -91,27 +91,6 @@ public class GlUtils {
         }
     }
 
-
-    public static int createVBO(float[] data, int locations, int size) {
-
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            int idVbo = glGenBuffers();
-            glBindBuffer(GL_ARRAY_BUFFER, idVbo);
-
-            FloatBuffer fb = stack.mallocFloat(data.length);
-            fb.put(data).flip();
-            glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-
-            glEnableVertexAttribArray(locations);
-            glVertexAttribPointer(locations,
-                    size, GL_FLOAT, false,
-                    0, 0);
-
-            return idVbo;
-        }
-    }
-
-
     /**
      * @param coords    x,y,z
      * @param colors    r,g,b,a
@@ -177,17 +156,6 @@ public class GlUtils {
         }
     }
 
-
-    public static int createIBO(int[] data) {
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer byteBuffer = stack.malloc(data.length * 4).asIntBuffer();
-            byteBuffer.put(data).flip();
-            int idIbo = glGenBuffers();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW);
-            return idIbo;
-        }
-    }
 
     public static void bindAttributes(int idVBO, int numCoords, int numColorComponents, boolean texCoord) {
 

@@ -3,6 +3,7 @@ package com.darkraha.opengldemoj.renders;
 import com.darkraha.opengldemoj.gl.*;
 import com.darkraha.opengldemoj.gl.modelling.GlModel;
 import com.darkraha.opengldemoj.gl.modelling.Models;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 
 
@@ -23,8 +24,8 @@ public class TexturedCubeRender extends Render {
         glEnable(GL_DEPTH_TEST);
 
         prog = new ShaderProgramBuilder()
-                .vertexAttributes(false, true, false)
-                .matrix(false)
+                .texture2D()
+                .matrix()
                 .build();
 
         glUseProgram(prog.idProgram);

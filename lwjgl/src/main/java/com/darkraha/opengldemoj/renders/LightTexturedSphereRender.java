@@ -2,6 +2,7 @@ package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.*;
 import com.darkraha.opengldemoj.gl.modelling.Models;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -32,9 +33,9 @@ public class LightTexturedSphereRender extends Render {
     public void onSetup(AppOGL appOGL) {
 
         prog = new ShaderProgramBuilder()
-                .lightDirectional()
-                .vertexAttributes(false, true, true)
-                .matrix(true)
+                .texture2D()
+                .lightDirectional(false)
+                .matrix()
                 .build();
 
         setSurfaceSize(appOGL.getWidth(), appOGL.getHeight());

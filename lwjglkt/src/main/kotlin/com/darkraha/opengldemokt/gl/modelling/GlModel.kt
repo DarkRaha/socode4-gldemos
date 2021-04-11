@@ -1,6 +1,5 @@
 package com.darkraha.opengldemokt.gl.modelling
 
-
 import org.lwjgl.opengl.GL33.*
 
 class GlModel(
@@ -14,7 +13,6 @@ class GlModel(
     constructor(idVao: Int, ids: IntArray, drawType: Int, count: Int, name: String)
             : this(idVao, ids, 0, drawType, count, name)
 
-
     fun draw() {
         glBindVertexArray(idVao)
         if (idIbo > 0) {
@@ -25,8 +23,8 @@ class GlModel(
     }
 
     fun dispose() {
-        glDeleteVertexArrays(ids[0])
-        ids[0] = 0
+        glDeleteVertexArrays(idVao)
+        glDeleteBuffers(idIbo)
         glDeleteBuffers(ids)
     }
 }

@@ -1,13 +1,14 @@
 package com.darkraha.opengldemoj.gl;
 
 
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 
-import static com.darkraha.opengldemoj.gl.ShaderProgramBuilder.*;
+import static com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder.*;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL33.*;
 
@@ -26,11 +27,9 @@ public class ShaderProgram {
 
     public ShaderProgram() {
         ShaderProgramBuilder builder = new ShaderProgramBuilder();
-        builder.solidColor().matrix();
-
+        builder.colors(false,true).matrix();
         init(builder.buildVertexShader(), builder.buildFragmentShader());
     }
-
 
     public ShaderProgram(String vertexShaderCode, String fragmentShaderCode) {
         init(vertexShaderCode, fragmentShaderCode);

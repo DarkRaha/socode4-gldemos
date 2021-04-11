@@ -5,7 +5,7 @@ import android.content.Context
 object GlCommon {
    lateinit var appContext: Context
 
-   val idArray = intArrayOf(0)
+   val idArray = intArrayOf(0,0,0,0,0,0,0,0,0,0)
 
     @JvmStatic
     val PI_F = Math.PI.toFloat()

@@ -2,7 +2,7 @@ package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.AppOGL;
 import com.darkraha.opengldemoj.gl.ShaderProgram;
-import com.darkraha.opengldemoj.gl.ShaderProgramBuilder;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -34,7 +34,7 @@ public class ColoredCubeRender extends Render {
         glEnable(GL_DEPTH_TEST);
 
         prog = new ShaderProgramBuilder()
-                .vertexAttributes(true, false, false)
+                .colors(true, false)
                 .build();
 
         glUseProgram(prog.idProgram);

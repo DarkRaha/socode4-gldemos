@@ -2,6 +2,7 @@ package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.*;
 import com.darkraha.opengldemoj.gl.modelling.Models;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -29,10 +30,9 @@ public class LightTexturedCubeRender extends Render {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
 
-        prog =  new ShaderProgramBuilder()
-                .vertexAttributes(false, true, true)
-                .lightDirectional()
-                .normalMatrix()
+        prog = new ShaderProgramBuilder()
+                .texture2D()
+                .lightDirectional(false)
                 .matrix()
                 .build();
 

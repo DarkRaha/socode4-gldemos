@@ -1,5 +1,6 @@
 package com.darkraha.gldemos.gl.modelling
 import android.opengl.GLES30.*
+import com.darkraha.gldemos.gl.GlCommon
 
 class GlModel(
     val idVao: Int,
@@ -23,7 +24,11 @@ class GlModel(
     }
 
     fun dispose() {
-        glDeleteVertexArrays(1, intArrayOf(idVao), 0)
+        val idArray = GlCommon.idArray
+        idArray[0]=idVao
+        idArray[1]=idIbo
+        glDeleteVertexArrays(1, idArray, 0)
         glDeleteBuffers(ids.size, ids,0)
+        glDeleteBuffers(1, idArray,1)
     }
 }

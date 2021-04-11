@@ -1,6 +1,7 @@
 package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.*;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -30,7 +31,7 @@ public class QuadRender extends Render {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
 
-        prog = new ShaderProgramBuilder().matrix().solidColor().build();
+        prog = new ShaderProgramBuilder().matrix().colors(false, true).build();
         glUseProgram(prog.idProgram);
 
         //-----------------------------------------------
@@ -61,10 +62,10 @@ public class QuadRender extends Render {
         // specify locations of attribute in data
 
         // 0 means  attribute tightly packed in the array
-        int stride  = 0;
+        int stride = 0;
 
         // 0 because in data only one attribute packed
-        int offset =0;
+        int offset = 0;
 
         // we specified location of position attribute in shader to 0
         int posAttributeLocation = 0;
@@ -73,7 +74,7 @@ public class QuadRender extends Render {
         int size = 2;
 
         glEnableVertexAttribArray(posAttributeLocation);
-        glVertexAttribPointer(posAttributeLocation,size, GL_FLOAT, false,
+        glVertexAttribPointer(posAttributeLocation, size, GL_FLOAT, false,
                 stride, offset);
 
         glBindVertexArray(0); // deactivate vao

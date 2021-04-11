@@ -1,6 +1,7 @@
 package com.darkraha.opengldemoj.renders;
 
 import com.darkraha.opengldemoj.gl.*;
+import com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder;
 import org.joml.Matrix4f;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -25,7 +26,7 @@ public class ColoredQuadRender extends Render {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
         prog = new ShaderProgramBuilder()
-                .vertexAttributes(true, false, false)
+                .colors(true,false)
                 .build();
 
         glUseProgram(prog.idProgram);
