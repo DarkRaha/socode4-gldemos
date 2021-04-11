@@ -2,6 +2,7 @@ package com.darkraha.gldemos.gl
 
 
 import android.opengl.GLES30.*
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import java.nio.ByteBuffer
@@ -22,8 +23,7 @@ class ShaderProgram {
 
     constructor() {
         val builder = ShaderProgramBuilder()
-        builder.solidColor().matrix()
-
+        builder.colors(false, true).matrix()
         init(builder.buildVertexShader(), builder.buildFragmentShader())
     }
 

@@ -4,7 +4,7 @@ package com.darkraha.gldemos.renders
 import android.opengl.GLES30.*
 import com.darkraha.gldemos.gl.GlCommon
 import com.darkraha.gldemos.gl.ShaderProgram
-import com.darkraha.gldemos.gl.ShaderProgramBuilder
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -32,7 +32,7 @@ class QuadRender : Render() {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         glEnable(GL_DEPTH_TEST)
 
-        prog = ShaderProgramBuilder().matrix().solidColor().build()
+        prog = ShaderProgramBuilder().colors(false,true).build()
         glUseProgram(prog.idProgram)
 
         //-----------------------------------------------

@@ -6,9 +6,9 @@ import com.darkraha.gldemos.R
 import com.darkraha.gldemos.gl.GlCommon
 import com.darkraha.gldemos.gl.GlUtils
 import com.darkraha.gldemos.gl.ShaderProgram
-import com.darkraha.gldemos.gl.ShaderProgramBuilder
 import com.darkraha.gldemos.gl.modelling.GlModel
 import com.darkraha.gldemos.gl.modelling.Models
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -29,8 +29,7 @@ class TexturedCubeRender(private val context: Context) : Render() {
         glEnable(GL_DEPTH_TEST)
 
         prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, false)
-            .matrix(false)
+            .texture2D()
             .build()
 
         glUseProgram(prog.idProgram)

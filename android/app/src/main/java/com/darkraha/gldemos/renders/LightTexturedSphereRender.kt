@@ -4,6 +4,7 @@ import android.opengl.GLES30.*
 import com.darkraha.gldemos.R
 import com.darkraha.gldemos.gl.*
 import com.darkraha.gldemos.gl.modelling.Models
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import javax.microedition.khronos.egl.EGLConfig
@@ -23,9 +24,8 @@ class LightTexturedSphereRender : Render() {
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         prog = ShaderProgramBuilder()
-            .lightDirectional()
-            .vertexAttributes(false, true, true)
-            .matrix(true)
+            .lightDirectional(false)
+            .texture2D()
             .build()
 
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)

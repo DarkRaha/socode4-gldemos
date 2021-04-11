@@ -8,8 +8,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 import android.graphics.BitmapFactory
-
-
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 
 
 object GlUtils {

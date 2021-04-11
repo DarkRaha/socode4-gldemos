@@ -6,6 +6,7 @@ import android.opengl.GLES30.*
 import com.darkraha.gldemos.R
 import com.darkraha.gldemos.gl.*
 import com.darkraha.gldemos.gl.modelling.Models
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Vector3f
 
 import javax.microedition.khronos.egl.EGLConfig
@@ -33,10 +34,8 @@ class LightTexturedCubeRender(private val context: Context) : Render() {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         glEnable(GL_DEPTH_TEST)
         prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, true)
-            .lightDirectional()
-            .normalMatrix()
-            .matrix()
+            .lightDirectional(false)
+            .texture2D()
             .build()
         glUseProgram(prog.idProgram)
         cube.model = Models.cube(1f, 1f, 1f, "cube-0").toGlModel()
@@ -48,7 +47,6 @@ class LightTexturedCubeRender(private val context: Context) : Render() {
         super.onSurfaceChanged(gl, width, height)
         matrices.projection.identity().perspective(GlCommon.ALNGLE45, aspect, 1f, 100f)
     }
-
 
 
     override fun onDrawFrame(arg0: GL10?) {

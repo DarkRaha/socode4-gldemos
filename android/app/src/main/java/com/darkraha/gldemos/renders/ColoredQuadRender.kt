@@ -5,9 +5,9 @@ import com.darkraha.gldemos.gl.GlCommon
 
 import com.darkraha.gldemos.gl.GlUtils
 import com.darkraha.gldemos.gl.ShaderProgram
-import com.darkraha.gldemos.gl.ShaderProgramBuilder
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
 
 import org.joml.Matrix4f
 import java.nio.ByteBuffer
@@ -36,7 +36,7 @@ class ColoredQuadRender : Render() {
         glEnable(GL_DEPTH_TEST)
 
         prog = ShaderProgramBuilder()
-            .vertexAttributes(true, false, false)
+            .colors(true, false)
             .build()
 
         glUseProgram(prog.idProgram)

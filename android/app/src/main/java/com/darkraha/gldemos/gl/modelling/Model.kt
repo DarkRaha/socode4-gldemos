@@ -1,10 +1,10 @@
 package com.darkraha.gldemos.gl.modelling
 
 import android.opengl.GLES30.*
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
-import com.darkraha.gldemos.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
 import org.joml.Vector3f
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

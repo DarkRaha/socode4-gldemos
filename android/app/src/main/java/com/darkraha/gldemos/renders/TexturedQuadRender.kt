@@ -4,6 +4,7 @@ import android.content.Context
 import android.opengl.GLES30.*
 import com.darkraha.gldemos.R
 import com.darkraha.gldemos.gl.*
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -29,7 +30,7 @@ class TexturedQuadRender(val context: Context) : Render() {
         glEnable(GL_DEPTH_TEST)
 
         prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, false)
+            .texture2D()
             .build()
 
         matrix = Matrix4f()
