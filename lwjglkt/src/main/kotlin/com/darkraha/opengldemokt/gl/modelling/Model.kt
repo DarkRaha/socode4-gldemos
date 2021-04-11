@@ -2,10 +2,10 @@ package com.darkraha.opengldemokt.gl.modelling
 
 
 
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_COLOR
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_NORMAL
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_POS
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.A_LOCATION_VERTEX_TEXPOS
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryStack

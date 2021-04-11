@@ -2,7 +2,7 @@ package com.darkraha.opengldemokt.renders
 
 import com.darkraha.opengldemokt.gl.AppOGL
 import com.darkraha.opengldemokt.gl.ShaderProgram
-import com.darkraha.opengldemokt.gl.ShaderProgramBuilder
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryStack
@@ -23,7 +23,7 @@ class ColoredQuadRender : Render() {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         glEnable(GL_DEPTH_TEST)
         prog = ShaderProgramBuilder()
-            .vertexAttributes(true, false, false)
+            .colors(true, false)
             .build()
         glUseProgram(prog.idProgram)
 

@@ -27,7 +27,6 @@ public class ShaderProgramBuilder implements HelperBuilder {
     public static final int IND_MATRIX_NORMAL = 5;
 
 
-
     public static final String[] U_MATRIX_NAMES = new String[]{
             "m", "mP", "mVM", "mV", "mM", "mNormal"
     };
@@ -46,12 +45,11 @@ public class ShaderProgramBuilder implements HelperBuilder {
     public static final String U_SAMPLER_NAME = "sampler";
 
 
-
     private String version = "330 core";
     private String precisionFloat = "mediump";
 
     private final BaseBuilder baseBuilder = new BaseBuilder();
-    private ColorBuilder colorBuilder= new ColorBuilder();
+    private ColorBuilder colorBuilder = new ColorBuilder();
     private Texture2DBuilder texture2DBuilder;
     private LightBuilder lightBuilder;
 
@@ -67,7 +65,7 @@ public class ShaderProgramBuilder implements HelperBuilder {
 
         addTypeDeclarations(sb, shaderType);
         addInputDeclarations(sb, shaderType);
-        addUniformDeclarations(sb,shaderType);
+        addUniformDeclarations(sb, shaderType);
         addExchangeDeclarations(sb, shaderType);
         addFuncsDeclarations(sb, shaderType);
 
@@ -116,11 +114,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     }
 
     public ShaderProgramBuilder lightDirectional(boolean withBumping) {
-        if (lightBuilder == null) {
-            lightBuilder = new DirectionLightBuilder();
-        }
-
-        ((DirectionLightBuilder) lightBuilder).withBumping = withBumping;
+        lightBuilder = new DirectionLightBuilder();
+        lightBuilder.withBumping = withBumping;
         return this;
     }
 
@@ -130,9 +125,20 @@ public class ShaderProgramBuilder implements HelperBuilder {
         return this;
     }
 
+    public ShaderProgramBuilder matrix(boolean v) {
+        baseBuilder.useMatrices[IND_MATRIX] = v;
+        return this;
+    }
+
     public ShaderProgramBuilder matrixP_VM() {
         baseBuilder.useMatrices[IND_MATRIX_VIEW_MODEL] = true;
         baseBuilder.useMatrices[IND_MATRIX_PROJECTION] = true;
+        return this;
+    }
+
+    public ShaderProgramBuilder matrixP_VM(boolean v) {
+        baseBuilder.useMatrices[IND_MATRIX_VIEW_MODEL] = v;
+        baseBuilder.useMatrices[IND_MATRIX_PROJECTION] = v;
         return this;
     }
 
@@ -143,6 +149,12 @@ public class ShaderProgramBuilder implements HelperBuilder {
         return this;
     }
 
+    public ShaderProgramBuilder matrixP_V_M(boolean v) {
+        baseBuilder.useMatrices[IND_MATRIX_VIEW] = v;
+        baseBuilder.useMatrices[IND_MATRIX_MODEL] = v;
+        baseBuilder.useMatrices[IND_MATRIX_PROJECTION] = v;
+        return this;
+    }
 
     public ShaderProgram build() {
         return new ShaderProgram(buildVertexShader(), buildFragmentShader());
@@ -152,10 +164,7 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addTypeDeclarations(StringBuilder sb, int shaderType) {
         baseBuilder.addTypeDeclarations(sb, shaderType);
-
-        if (colorBuilder != null) {
-            colorBuilder.addTypeDeclarations(sb, shaderType);
-        }
+        colorBuilder.addTypeDeclarations(sb, shaderType);
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addTypeDeclarations(sb, shaderType);
@@ -170,10 +179,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addInputDeclarations(StringBuilder sb, int shaderType) {
         baseBuilder.addInputDeclarations(sb, shaderType);
+        colorBuilder.addInputDeclarations(sb, shaderType);
 
-        if (colorBuilder != null) {
-            colorBuilder.addInputDeclarations(sb, shaderType);
-        }
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addInputDeclarations(sb, shaderType);
@@ -187,10 +194,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addExchangeDeclarations(StringBuilder sb, int shaderType) {
         baseBuilder.addExchangeDeclarations(sb, shaderType);
+        colorBuilder.addExchangeDeclarations(sb, shaderType);
 
-        if (colorBuilder != null) {
-            colorBuilder.addExchangeDeclarations(sb, shaderType);
-        }
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addExchangeDeclarations(sb, shaderType);
@@ -204,10 +209,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addUniformDeclarations(StringBuilder sb, int shaderType) {
         baseBuilder.addUniformDeclarations(sb, shaderType);
+        colorBuilder.addUniformDeclarations(sb, shaderType);
 
-        if (colorBuilder != null) {
-            colorBuilder.addUniformDeclarations(sb, shaderType);
-        }
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addUniformDeclarations(sb, shaderType);
@@ -221,10 +224,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addFuncsDeclarations(StringBuilder sb, int shaderType) {
         baseBuilder.addFuncsDeclarations(sb, shaderType);
+        colorBuilder.addFuncsDeclarations(sb, shaderType);
 
-        if (colorBuilder != null) {
-            colorBuilder.addFuncsDeclarations(sb, shaderType);
-        }
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addFuncsDeclarations(sb, shaderType);
@@ -238,10 +239,7 @@ public class ShaderProgramBuilder implements HelperBuilder {
     @Override
     public void addCalculations(StringBuilder sb, int shaderType) {
         baseBuilder.addCalculations(sb, shaderType);
-
-        if (colorBuilder != null) {
-            colorBuilder.addCalculations(sb, shaderType);
-        }
+        colorBuilder.addCalculations(sb, shaderType);
 
         if (texture2DBuilder != null) {
             texture2DBuilder.addCalculations(sb, shaderType);

@@ -3,6 +3,7 @@ package com.darkraha.opengldemokt.renders
 
 import com.darkraha.opengldemokt.gl.*
 import com.darkraha.opengldemokt.gl.modelling.Models
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -30,10 +31,8 @@ class LightTexturedCubeRender : Render() {
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f)
         glEnable(GL_DEPTH_TEST)
         prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, true)
-            .lightDirectional()
-            .normalMatrix()
-            .matrix()
+            .texture2D()
+            .lightDirectional(false)
             .build()
         glUseProgram(prog.idProgram)
         cube.model = Models.cube(1f, 1f, 1f, "cube-0").toGlModel()

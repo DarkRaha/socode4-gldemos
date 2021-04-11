@@ -1,9 +1,9 @@
 package com.darkraha.opengldemokt.renders
 
 import com.darkraha.opengldemokt.gl.*
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 
 import org.joml.Matrix4f
-import org.lwjgl.opengl.*
 import org.lwjgl.opengl.GL33.*
 
 /**
@@ -27,7 +27,7 @@ class TexturedQuadRender : Render() {
         glEnable(GL_DEPTH_TEST)
 
         prog = ShaderProgramBuilder()
-            .vertexAttributes(false, true, false)
+            .texture2D()
             .build()
 
         matrix = Matrix4f()

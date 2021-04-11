@@ -2,6 +2,7 @@ package com.darkraha.opengldemokt.renders
 
 import com.darkraha.opengldemokt.gl.*
 import com.darkraha.opengldemokt.gl.modelling.Models
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL11
@@ -24,9 +25,8 @@ class LightTexturedSphereRender : Render() {
 
     override fun onSetup(appOGL: AppOGL) {
         prog = ShaderProgramBuilder()
-            .lightDirectional()
-            .vertexAttributes(false, true, true)
-            .matrix(true)
+            .texture2D()
+            .lightDirectional(false)
             .build()
 
         setSurfaceSize(appOGL.width, appOGL.height)

@@ -1,6 +1,7 @@
 package com.darkraha.opengldemokt.gl
 
 
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL33.*
@@ -23,8 +24,7 @@ class ShaderProgram {
 
     constructor() {
         val builder = ShaderProgramBuilder()
-        builder.solidColor().matrix()
-
+        builder.colors(false, true)
         init(builder.buildVertexShader(), builder.buildFragmentShader())
     }
 
@@ -143,7 +143,7 @@ class ShaderProgram {
 
     companion object {
         val MATRIX_BUFFER = MemoryUtil.memAllocFloat(16)
-        
+
         fun createProgram(vertexShaderSource: String, fragmentShaderSource: String): IntArray {
             val idVertexShader: Int = compileShader(GL_VERTEX_SHADER, vertexShaderSource)
 
@@ -180,8 +180,6 @@ class ShaderProgram {
             }
             return idShader
         }
-
-      
 
 
         @JvmStatic
