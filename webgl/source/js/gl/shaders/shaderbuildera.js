@@ -1,211 +1,454 @@
-class ShaderBuilderA {
-    mVersion = "#version 300 es\n"
-    mPrecision = "precision mediump float;\n"
-    mVertexCoords = false
-    mVertexColors = false
-    mVertexTextureCoords = false
-    mVertexNormals = false
-    mMatrix = false
-    mProjectionMatrix = false
-    mViewModelMatrix = false
-    mViewMatrix = false
-    mModelMatrix = false
-    mNormalMatrix = false
-    exOut = true
-    exColor = false
-    exTexCoord = false
-    exLighting = false
+class BaseBuilder {
+    matricesDeclaration = [
+        "uniform mat4 m;\n",
+        "uniform mat4 mP;\n",
+        "uniform mat4 mVM;\n",
+        "uniform mat4 mV;\n",
+        "uniform mat4 mM;\n"
+    ];
 
-    buildCalcTexCoord() {
-        return this.mVertexTextureCoords ? "exTexCoord = vTexCoord;\n" : "";
+    useMatrices = [true, false, false, false, false];
+
+    addTypeDeclarations(sb, shaderType) {
+        return sb;
     }
 
-    buildCalcColor() {
-        return this.mVertexColors ? "exColor = vColor;\n" : "";
-    }
-
-    setVertexInputData(vCoords, vColors, vTexCoords, vNormals) {
-        this.mVertexCoords = vCoords;
-        this.mVertexColors = vColors;
-        this.mVertexTextureCoords = vTexCoords;
-        this.mVertexNormals = vNormals;
-    }
-
-    buildDeclareVertexInputData() {
-        var sb = "";
-
-        if (this.mVertexCoords) {
-            sb = sb + "layout(location=0) in vec4 vCoord;\n";
+    addInputDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + "layout(location=0) in vec4 vPos;\n";
         }
-        if (this.mVertexColors) {
-            sb = sb + "layout(location=1) in vec4 vColor;\n";
+
+        return sb;
+    }
+
+    addExchangeDeclarations(sb, shaderType) {
+        return sb;
+    }
+
+    addUniformDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            for (var i = 0; i < this.useMatrices.length; ++i) {
+                if (this.useMatrices[i]) {
+                    sb = sb + this.matricesDeclaration[i];
+                }
+            }
         }
-        if (this.mVertexNormals) {
+        return sb;
+    }
+
+    addFuncsDeclarations(sb, shaderType) { return sb; }
+
+    addCalculations(sb, shaderType) {
+
+        if (1 == shaderType) {
+            if (this.useMatrices[0]) {
+                sb = sb + "    gl_Position = m  * vPos;\n";
+            } else if (this.useMatrices[2]) {
+                sb = sb + "    gl_Position = mP  * mVM * vPos;\n";
+            } else if (this.useMatrices[4]) {
+                sb = sb + "    gl_Position = mP  * mV * mM * vPos;\n";
+            }
+        }
+        return sb;
+    }
+};
+
+
+class ColorBuilder {
+    usePerVertex = false;
+    useSolidColor = false;
+
+    addTypeDeclarations(sb, shaderType) {
+        return sb;
+    }
+
+    addInputDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            if (this.usePerVertex) {
+                sb = sb + "layout(location=1) in vec4 vColor;\n";
+            }
+        }
+        return sb;
+    }
+
+    addExchangeDeclarations(sb, shaderType) {
+        if (this.usePerVertex || this.useSolidColor) {
+            if (shaderType == 1) {
+                sb = sb + "out vec4 exColor;\n";
+            }
+            if (shaderType == 2) {
+                sb = sb + "in vec4 exColor;\n";
+            }
+        }
+        if (shaderType == 2) {
+            sb = sb + "out vec4 fragColor;\n";
+        }
+
+        return sb;
+    }
+
+    addUniformDeclarations(sb, shaderType) {
+        if (this.useSolidColor) {
+            sb = sb + "uniform vec4 solidColor;\n";
+        }
+
+        return sb;
+    }
+
+    addFuncsDeclarations(sb, shaderType) { return sb; }
+
+    addCalculations(sb, shaderType) {
+        if (shaderType == 1) {
+            if (this.usePerVertex && this.useSolidColor) {
+                sb = sb + "exColor = vColor * solidColor;\n";
+            } else if (this.usePerVertex) {
+                sb = sb + "exColor = vColor;\n";
+            } else if (this.useSolidColor) {
+                sb = sb + "exColor = solidColor;\n";
+            }
+        }
+        if (shaderType == 2) {
+            if (this.usePerVertex || this.useSolidColor) {
+                sb = sb + "fragColor = exColor;\n";
+            } else {
+                sb = sb + "fragColor = vec4(1,1,1,1);\n";
+            }
+        }
+
+        return sb;
+    }
+};
+
+class Texture2DBuilder {
+
+    addTypeDeclarations(sb, shaderType) { return sb; }
+
+    addInputDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + "layout(location=3) in vec2 vTexPos ;\n";
+        }
+        return sb;
+    }
+
+    addExchangeDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + "out vec2 exTexPos;\n";
+        }
+        if (shaderType == 2) {
+            sb = sb + "in vec2 exTexPos;\n";
+        }
+        return sb;
+    }
+
+    addUniformDeclarations(sb, shaderType) {
+        if (shaderType == 2) {
+            sb = sb + "uniform sampler2D sampler;\n";
+        }
+        return sb;
+    }
+
+    addFuncsDeclarations(sb, shaderType) { return sb; }
+
+    addCalculations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + "exTexPos = vTexPos;\n";
+        }
+        if (shaderType == 2) {
+            sb = sb + "fragColor = fragColor*texture(sampler, exTexPos);\n";
+        }
+        return sb;
+    }
+};
+
+
+class LightBuilder {
+    withBumping = false;
+
+    addTypeDeclarations(sb, shaderType) {
+        sb = sb + "struct Light {\n";
+        sb = sb + " vec3 ambient; \n";
+        sb = sb + " vec3 diffuse; \n";
+        sb = sb + " vec3 direction; \n";
+        sb = sb + "};\n";
+        return sb;
+    }
+
+    addInputDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
             sb = sb + "layout(location=2) in vec3 vNormal;\n";
         }
-        if (this.mVertexTextureCoords) {
-            sb = sb + "layout(location=3) in vec2 vTexCoord ;\n";
-        }
         return sb;
     }
 
-    setMatrix(
-        matrix, projMatrix,
-        viewModelMatrix,
-        viewMatrix,
-        modelMatrix,
-        normalMatrix
-    ) {
-        this.mMatrix = matrix;
-        this.mProjectionMatrix = projMatrix;
-        this.mViewMatrix = viewMatrix;
-        this.mViewModelMatrix = viewModelMatrix;
-        this.mModelMatrix = modelMatrix;
-        this.mNormalMatrix = normalMatrix;
-    }
+    addUniformDeclarations(sb, shaderType) {
+        sb = sb + "uniform mat4 mNormal;\n";
 
-    buildCalcPosition() {
-        var sb = "";
-        if (this.mMatrix) {
-            sb = "    gl_Position = matrix  * vCoord;\n";
-        } else if (this.mViewModelMatrix) {
-            sb = "    gl_Position = projMatrix  * viewModelMatrix * vCoord;\n";
-        } else if (this.mModelMatrix) {
-            sb = "    gl_Position = projMatrix  * viewMatrix * modelMatrix * vCoord;\n";
+        if (shaderType == 1) {
+            sb = sb + "uniform Light light;\n";
+            sb = sb + "uniform vec3 ambient;\n";
         }
         return sb;
     }
+};
 
-    buildMatrixDeclare() {
-        var sb = "";
-
-        if (this.mMatrix) {
-            sb = sb + "uniform mat4 matrix;\n";
-        }
-        if (this.mProjectionMatrix) {
-            sb = sb + "uniform mat4 projectionMatrix;\n";
-        }
-        if (this.mViewModelMatrix) {
-            sb = sb + "uniform mat4 viewModelMatrix;\n";
-        }
-        if (this.mViewMatrix) {
-            sb = sb + "uniform mat4 viewMatrix;\n";
-        }
-        if (this.mModelMatrix) {
-            sb = sb + "uniform mat4 modelMatrix;\n";
-        }
-        if (this.mNormalMatrix) {
-            sb = sb + "uniform mat4 normalMatrix;\n";
-        }
-        /*  //binding not supported
-        if (mMatrix) {
-            sb.append("layout(binding=0) uniform mat4 matrix;\n");
-        }
-
-        if (mProjectionMatrix) {
-            sb.append("layout(binding=1) uniform mat4 projectionMatrix;\n");
-        }
-
-        if (mViewModelMatrix) {
-            sb.append("layout(binding=2) uniform mat4 viewModelMatrix;\n");
-        }
-
-        if (mViewMatrix) {
-            sb.append("layout(binding=3) uniform mat4 viewMatrix;\n");
-        }
-
-        if (mModelMatrix) {
-            sb.append("layout(binding=4) uniform mat4 modelMatrix;\n");
-        }
-
-        if (mNormalMatrix) {
-            sb.append("layout(binding=5) uniform mat4 normalMatrix;\n");
-        }*/
-        return sb;
-    }
-
-    setExchangeData(color, texCoord, lighting) {
-        this.exColor = color;
-        this.exTexCoord = texCoord;
-        this.exLighting = lighting;
-    }
-
-    buildDeclareExchangeOut() {
-        var sb = "";
-        if (this.exColor) {
-            sb = sb + "out vec4 exColor;\n";
-        }
-        if (this.exTexCoord) {
-            sb = sb + "out vec2 exTexCoord;\n";
-        }
-        if (this.exLighting) {
+class DirectionLightBuilder extends LightBuilder {
+    addExchangeDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
             sb = sb + "out vec3 exLighting;\n";
         }
-        return sb;
-    }
 
-    buildDeclareExchangeIn() {
-        var sb = "";
-        if (this.exColor) {
-            sb = sb + "in vec4 exColor;\n";
-        }
-        if (this.exTexCoord) {
-            sb = sb + "in vec2 exTexCoord;\n";
-        }
-        if (this.exLighting) {
+        if (shaderType == 2) {
             sb = sb + "in vec3 exLighting;\n";
         }
+
         return sb;
     }
 
-    setPrecision(val) {
-        var sval = "";
-        switch (val) {
-
-            case 0:
-                sval = "lowp";
-                break;
-            case 1:
-                sval = "mediump";
-                break;
-            case 2:
-                sval = "highp";
-                break;
+    addFuncsDeclarations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + "vec3 calcLight(){\n";
+            sb = sb + "  vec4 transformedNormal = mNormal *vec4 (vNormal,1.0);\n";
+            sb = sb + "  float direction = max(dot(transformedNormal.xyz, light.direction), 0.0);\n";
+            sb = sb + "  return  light.ambient + (light.diffuse * direction);\n";
+            //sb = sb + "  return vec3(0.5,0.5,0.5);\n";
+            sb = sb + "}\n";
         }
 
-        mPrecision = `precision ${sval} float;\n`;
+        return sb;
+    }
+
+    addCalculations(sb, shaderType) {
+        if (shaderType == 1) {
+            sb = sb + " exLighting = calcLight();\n";
+        }
+        if (shaderType == 2) {
+            sb = sb + "fragColor = vec4(fragColor.rgb * exLighting, fragColor.a);\n";
+
+        }
+        return sb;
+    }
+};
+
+
+
+class ShaderProgramBuilder {
+    gl
+    version = "300 es";
+    precisionFloat = "mediump";
+    baseBuilder = new BaseBuilder();
+    colorBuilder = new ColorBuilder();
+    texture2DBuilder;
+    lightBuilder;
+
+    constructor(gl) {
+        this.gl = gl;
+    }
+
+    buildShader(shaderType) {
+        var sb = "";
+        sb = sb + "#version " + this.version + "\n";
+        sb = sb + "precision " + this.precisionFloat + " float;\n";
+
+
+        sb = this.addTypeDeclarations(sb, shaderType);
+        sb = this.addInputDeclarations(sb, shaderType);
+        sb = this.addUniformDeclarations(sb, shaderType);
+        sb = this.addExchangeDeclarations(sb, shaderType);
+        sb = this.addFuncsDeclarations(sb, shaderType);
+
+        sb = sb + "void main() {\n";
+        sb = this.addCalculations(sb, shaderType);
+        sb = sb + "}\n";
+        console.log("Shader " + shaderType + " :\n" + sb);
+        return sb;
+    }
+
+    buildVertexShader() {
+        return this.buildShader(1);
+    }
+
+    buildFragmentShader() {
+        return this.buildShader(2);
+    }
+
+    //------------------------------------------------------------------
+    colors(usePerVertex, useSolidColor) {
+        this.colorBuilder.useSolidColor = useSolidColor;
+        this.colorBuilder.usePerVertex = usePerVertex;
+        return this;
+    }
+
+    version(v) {
+        this.version = v;
+        return this;
+    }
+
+    precision(v) {
+        this.precisionFloat = v;
+        return this;
+    }
+
+    texture2D() {
+        if (this.texture2DBuilder == null) {
+            this.texture2DBuilder = new Texture2DBuilder();
+        }
+        return this;
+    }
+
+    lightDirectional(withBumping) {
+        this.lightBuilder = new DirectionLightBuilder();
+        this.lightBuilder.withBumping = withBumping;
+        return this;
     }
 
 
-    buildDeclareOutCustom() {
-        return "";
+
+    matrix(vBool) {
+        this.baseBuilder.useMatrices[0] = vBool == undefined ? true : vBool; //!!v;
+        return this;
     }
 
-    buildDeclareExchangeCustom() {
-        return "";
+    matrixP_VM(v) {
+        const newValue = v == undefined ? true : v;
+        this.baseBuilder.useMatrices[3] = newValue;
+        this.baseBuilder.useMatrices[1] = newValue;
+        return this;
     }
 
-    buildDeclareUniformCustom() {
-        return "";
-    }
 
-    buildCalcCustom() {
-        return "";
+    matrixP_V_M(v) {
+        const newValue = v == undefined ? true : v;
+        this.baseBuilder.useMatrices[3] = newValue;
+        this.baseBuilder.useMatrices[4] = newValue;
+        this.baseBuilder.useMatrices[1] = newValue;
+        return this;
     }
 
     build() {
-        var sb = "";
-        sb = sb + this.mVersion;
-        sb = sb + this.mPrecision;
-        sb = sb + this.buildDeclareVertexInputData();
-        sb = sb + this.buildMatrixDeclare();
-        sb = sb + this.buildDeclareUniformCustom();
-        sb = sb + (this.exOut ? this.buildDeclareExchangeOut() : this.buildDeclareExchangeIn());
-        sb = sb + this.buildDeclareExchangeCustom();
-        sb = sb + this.buildDeclareOutCustom();
-        sb = sb + "void main() {\n";
-        sb = sb + this.buildCalcCustom();
-        sb = sb + "}\n";
+        return new ShaderProgram(this.gl,
+            this.buildVertexShader(), this.buildFragmentShader());
+    }
+
+    //========================================================================
+    addTypeDeclarations(sb, shaderType) {
+        sb = this.baseBuilder.addTypeDeclarations(sb, shaderType);
+        sb = this.colorBuilder.addTypeDeclarations(sb, shaderType);
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addTypeDeclarations(sb, shaderType);
+        }
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addTypeDeclarations(sb, shaderType);
+        }
+
         return sb;
     }
-}
+
+    addInputDeclarations(sb, shaderType) {
+        sb = this.baseBuilder.addInputDeclarations(sb, shaderType);
+        sb = this.colorBuilder.addInputDeclarations(sb, shaderType);
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addInputDeclarations(sb, shaderType);
+        }
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addInputDeclarations(sb, shaderType)
+        }
+        return sb;
+    }
+
+    addExchangeDeclarations(sb, shaderType) {
+        sb = this.baseBuilder.addExchangeDeclarations(sb, shaderType)
+        sb = this.colorBuilder.addExchangeDeclarations(sb, shaderType)
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addExchangeDeclarations(sb, shaderType);
+        }
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addExchangeDeclarations(sb, shaderType);
+        }
+        return sb;
+    }
+
+    addUniformDeclarations(sb, shaderType) {
+        sb = this.baseBuilder.addUniformDeclarations(sb, shaderType)
+        sb = this.colorBuilder.addUniformDeclarations(sb, shaderType)
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addUniformDeclarations(sb, shaderType);
+        }
+
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addUniformDeclarations(sb, shaderType);
+        }
+
+        return sb;
+    }
+
+    addFuncsDeclarations(sb, shaderType) {
+        sb = this.baseBuilder.addFuncsDeclarations(sb, shaderType)
+        sb = this.colorBuilder.addFuncsDeclarations(sb, shaderType)
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addFuncsDeclarations(sb, shaderType);
+        }
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addFuncsDeclarations(sb, shaderType);
+        }
+
+        return sb;
+    }
+
+    addCalculations(sb, shaderType) {
+        sb = this.baseBuilder.addCalculations(sb, shaderType);
+        sb = this.colorBuilder.addCalculations(sb, shaderType);
+
+        if (!!this.texture2DBuilder) {
+            sb = this.texture2DBuilder.addCalculations(sb, shaderType);
+        }
+
+        if (!!this.lightBuilder) {
+            sb = this.lightBuilder.addCalculations(sb, shaderType);
+        }
+
+        return sb;
+    }
+};
+
+ShaderProgramBuilder.SHADER_TYPE_VERTEX = 1;
+ShaderProgramBuilder.SHADER_TYPE_FRAGMENT = 2;
+ShaderProgramBuilder.A_LOCATION_VERTEX_POS = 0;
+ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR = 1;
+ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL = 2;
+ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS = 3;
+ShaderProgramBuilder.IND_VERTEX_POS = 0;
+ShaderProgramBuilder.IND_VERTEX_COLOR = 1;
+ShaderProgramBuilder.IND_VERTEX_NORMAL = 2;
+ShaderProgramBuilder.IND_VERTEX_TEX_POS = 3;
+ShaderProgramBuilder.IND_VERTEX_TANGENT = 4;
+ShaderProgramBuilder.IND_VERTEX_BITANGENT = 5;
+ShaderProgramBuilder.IND_MATRIX = 0;
+ShaderProgramBuilder.IND_MATRIX_PROJECTION = 1;
+ShaderProgramBuilder.IND_MATRIX_VIEW_MODEL = 2;
+ShaderProgramBuilder.IND_MATRIX_VIEW = 3;
+ShaderProgramBuilder.IND_MATRIX_MODEL = 4;
+ShaderProgramBuilder.IND_MATRIX_NORMAL = 5;
+ShaderProgramBuilder.U_SOLID_COLOR_NAME = "solidColor";
+ShaderProgramBuilder.U_SAMPLER_NAME = "sampler";
+
+ShaderProgramBuilder.U_MATRIX_NAMES = [
+    "m", "mP", "mVM", "mV", "mM", "mNormal"
+];
+ShaderProgramBuilder.INPUT_DATA_NAMES = [
+    "vPos", "vColor", "vNormal", "vTexPos", "vTangent", "vBitangent"
+];
+ShaderProgramBuilder.U_LIGHT_NAMES = [
+    "light.ambient",
+    "light.diffuse",
+    "light.direction"
+];

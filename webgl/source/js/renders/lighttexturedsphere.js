@@ -1,9 +1,9 @@
-class LightTexturedCubeRender extends Render {
+class LightTexturedSphereRender extends Render {
 
 
     matrices = new Matrices();
     prog
-    cube = new GlObject();
+    sphere = new GlObject();
 
     rotY = 1.5 * Math.PI / 180;
     rotX = Math.PI / 180;
@@ -31,8 +31,9 @@ class LightTexturedCubeRender extends Render {
 
         glMatrix.mat4.translate(this.matrices.model, this.matrices.model, [0.0, 0.0, -6.0]);
 
-        this.cube.model = Models.cube(gl, 1, 1, 1, "cube").toGlModel(gl);
-        this.cube.texture = GlTexture.newTexture2D(gl, "images/textures/235.jpg", "test");
+        this.sphere.model = Models.sphere(gl, 1,
+            36, 36, 1, 0.5, 0.5, "sphere").toGlModel(gl);
+        this.sphere.texture = GlTexture.newTexture2D(gl, "images/textures/235.jpg", "test");
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
         gl.clearDepth(1.0); // Clear everything
@@ -54,12 +55,12 @@ class LightTexturedCubeRender extends Render {
 
         this.matrices.applyCurrentModel();
 
-        this.prog.uniformTexture(this.cube.texture);
+        this.prog.uniformTexture(this.sphere.texture);
         this.prog.uniformMatrices(this.matrices);
         this.prog.uniformDirectionalLight(this.lightAmbient,
             this.lightDiffuse, this.lightDirection);
 
-        this.cube.model.draw(gl);
+        this.sphere.model.draw(gl);
     }
 
 }

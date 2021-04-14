@@ -84,7 +84,7 @@ GlUtils.bindAttributes = function(gl, idVbo, numCoords,
     if (numColorComponents > 0) {
         gl.enableVertexAttribArray(A_LOCATION_COLORS);
         gl.vertexAttribPointer(
-            A_LOCATION_COLORS, numCoords,
+            A_LOCATION_COLORS, numColorComponents,
             gl.FLOAT, false, stride, 4 * numCoords);
     }
 
