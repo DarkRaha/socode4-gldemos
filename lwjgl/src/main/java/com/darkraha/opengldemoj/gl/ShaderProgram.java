@@ -19,7 +19,7 @@ public class ShaderProgram {
     private final int[] matricesLocations = new int[U_MATRIX_NAMES.length];
     private final int[] samplersLocations = new int[8];
     private int[] light = new int[3];
-    private int normalLocation;
+    private int normalSamplerLocation;
 
     public int solidColorLocation;
     public int idProgram;
@@ -54,10 +54,15 @@ public class ShaderProgram {
             samplersLocations[i] = glGetUniformLocation(idProgram, U_SAMPLER_NAME + i);
         }
 
+        normalSamplerLocation = glGetUniformLocation(idProgram, U_NORMAL_SAMPLER_NAME);
+
         solidColorLocation = glGetUniformLocation(idProgram, U_SOLID_COLOR_NAME);
         light[0] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[0]);
         light[1] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[1]);
         light[2] = glGetUniformLocation(idProgram, U_LIGHT_NAMES[2]);
+
+
+
     }
 
 
@@ -87,11 +92,50 @@ public class ShaderProgram {
         glUniform4fv(solidColorLocation, color);
     }
 
+
+    private void uniformObjectTexture(GlObject glObject){
+        int usedUnit = 0;
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(glObject.texture.textureType, glObject.texture.idTexture);
+        glUniform1i(samplersLocations[0], 0);
+        ++usedUnit;
+
+        if(glObject.normalTexture!=null){
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(glObject.normalTexture.textureType, glObject.normalTexture.idTexture);
+            glUniform1i(normalSamplerLocation, usedUnit);
+            ++usedUnit;
+        }
+
+        if(glObject.extraTextures!=null){
+            for(int i =0 ; i<glObject.extraTextures.length; ++i){
+                glActiveTexture(GL_TEXTURE0+usedUnit);
+                glBindTexture(glObject.extraTextures[i].textureType, glObject.extraTextures[i].idTexture);
+                glUniform1i(samplersLocations[i+1], usedUnit);
+                ++usedUnit;
+            }
+        }
+
+    }
+
+    public void uniform(GlObject glObject, Matrices m, LightDirectional light){
+        uniformObjectTexture(glObject);
+        if(glObject.transforms!=null){
+            m.applyModel(glObject.transforms);
+        }
+
+        uniformMatrices(m);
+
+        if(light!=null){
+            uniformDirectionalLight(light.ambient, light.diffuseColor, light.direction);
+        }
+    }
+
     public void uniformMatrices(Matrices m) {
         glUniformMatrix4fv(matricesLocations[IND_MATRIX], false, m.matrix.get(MATRIX_BUFFER));
         glUniformMatrix4fv(matricesLocations[IND_MATRIX_NORMAL], false, m.normals.get(MATRIX_BUFFER));
         glUniformMatrix4fv(matricesLocations[IND_MATRIX_PROJECTION], false, m.projection.get(MATRIX_BUFFER));
-        glUniformMatrix4fv(matricesLocations[IND_MATRIX_VIEW], false, m.camera.get(MATRIX_BUFFER));
+        glUniformMatrix4fv(matricesLocations[IND_MATRIX_VIEW], false, m.view.get(MATRIX_BUFFER));
         glUniformMatrix4fv(matricesLocations[IND_MATRIX_VIEW_MODEL], false, m.viewModel.get(MATRIX_BUFFER));
         glUniformMatrix4fv(matricesLocations[IND_MATRIX_MODEL], false, m.model.get(MATRIX_BUFFER));
     }

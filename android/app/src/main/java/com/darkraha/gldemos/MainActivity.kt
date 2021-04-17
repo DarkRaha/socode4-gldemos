@@ -35,11 +35,12 @@ class MainActivity : AppCompatActivity() {
 
         // render = QuadRender()
         // render = ColoredQuadRender()
-       //  render = ColoredCubeRender()
-       // render = TexturedQuadRender(this)
-      // render = TexturedCubeRender(this)
+        //  render = ColoredCubeRender()
+        // render = TexturedQuadRender(this)
+        // render = TexturedCubeRender(this)
         // render = LightTexturedCubeRender(this)
-        render = LightTexturedSphereRender()
+        //render = LightTexturedSphereRender()
+        render = BumpingSphereRender()
         glSurfaceView.setRenderer(render)
         setContentView(glSurfaceView)
     }

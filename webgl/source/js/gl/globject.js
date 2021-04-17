@@ -3,4 +3,5 @@ class GlObject {
     texture
     normalTexture
     transforms
+    extraTextures
 }

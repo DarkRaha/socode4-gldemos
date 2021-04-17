@@ -200,6 +200,8 @@ class ShaderProgramBuilder : HelperBuilder {
         const val A_LOCATION_VERTEX_COLOR = 1
         const val A_LOCATION_VERTEX_NORMAL = 2
         const val A_LOCATION_VERTEX_TEXPOS = 3
+        const val A_LOCATION_VERTEX_TANGENT = 4
+        const val A_LOCATION_VERTEX_BITANGENT = 5
         const val IND_VERTEX_POS = 0
         const val IND_VERTEX_COLOR = 1
         const val IND_VERTEX_NORMAL = 2
@@ -214,6 +216,8 @@ class ShaderProgramBuilder : HelperBuilder {
         const val IND_MATRIX_NORMAL = 5
         const val U_SOLID_COLOR_NAME = "solidColor"
         const val U_SAMPLER_NAME = "sampler"
+        const val U_NORMAL_SAMPLER_NAME = "normalSampler"
+
 
         val U_MATRIX_NAMES = arrayOf(
             "m", "mP", "mVM", "mV", "mM", "mNormal"

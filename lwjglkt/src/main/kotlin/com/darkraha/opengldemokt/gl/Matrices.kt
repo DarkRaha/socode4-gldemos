@@ -4,7 +4,7 @@ import org.joml.Matrix4f
 
 class Matrices {
     val projection = Matrix4f().perspective(45 * TO_RAD, 1f, 1f, 100f)
-    val camera = Matrix4f().lookAlong(0f, 0f, -1f, 0f, 1f, 0f)
+    val view = Matrix4f().lookAlong(0f, 0f, -1f, 0f, 1f, 0f)
     lateinit var model: Matrix4f
     val viewModel = Matrix4f()
     val normals = Matrix4f()
@@ -12,7 +12,7 @@ class Matrices {
 
     fun applyModel(modelMatrix: Matrix4f) {
         model = modelMatrix
-        camera.mul(modelMatrix, viewModel)
+        view.mul(modelMatrix, viewModel)
         matrix.set(projection).mul(viewModel)
         viewModel.invert(normals)
         normals.transpose()

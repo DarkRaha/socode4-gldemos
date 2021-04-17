@@ -1,11 +1,8 @@
-/**
- * For testing different models.
- */
-class ModelRender extends Render {
-
-
+class BumpingSphereRender extends Render {
+    withBump = true;
     matrices = new Matrices();
     prog
+    progWithBump
     sphere = new GlObject();
 
     rotY = 1.5 * Math.PI / 180;
@@ -21,15 +18,17 @@ class ModelRender extends Render {
 
         const gl = appOGL.gl;
 
-
         this.prog = new ShaderProgramBuilder(gl)
+            .lightDirectional(false)
+            .texture2D()
+            .build();
+
+        this.progWithBump = new ShaderProgramBuilder(gl)
             .lightDirectional(true)
             .texture2D()
             .build();
 
         gl.useProgram(this.prog.idProgram);
-
-        //  glMatrix.mat4.translate(this.matrices.model, this.matrices.model, [0.0, 0.0, -6.0]);
 
         this.sphere.model = Models
             .sphere(gl, 1,
@@ -51,27 +50,19 @@ class ModelRender extends Render {
     }
 
     onDrawFrame(appOGL) {
-
         const gl = appOGL.gl;
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        const prog = this.withBump ? this.progWithBump : this.prog;
 
         glMatrix.mat4.rotate(this.sphere.transforms, this.sphere.transforms,
             this.rotX, [1, 0, 0]);
         glMatrix.mat4.rotate(this.sphere.transforms, this.sphere.transforms,
             this.rotY, [0, 1, 0]);
 
-        gl.useProgram(this.prog.idProgram);
-
-        //  this.matrices.applyModel(this.sphere.transforms);
-
-        // this.prog.uniformTexture(this.sphere.texture);
-        // this.prog.uniformMatrices(this.matrices);
-        // this.prog.uniformDirectionalLight(this.light.ambient,
-        //     this.light.diffuseColor, this.light.direction);
-
-        this.prog.uniform(this.sphere, this.matrices, this.light);
+        gl.useProgram(prog.idProgram);
+        prog.uniform(this.sphere, this.matrices, this.light);
         this.sphere.model.draw(gl);
     }
-
 
 }

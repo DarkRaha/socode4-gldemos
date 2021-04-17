@@ -11,6 +11,8 @@ public class ShaderProgramBuilder implements HelperBuilder {
     public static final int A_LOCATION_VERTEX_COLOR = 1;
     public static final int A_LOCATION_VERTEX_NORMAL = 2;
     public static final int A_LOCATION_VERTEX_TEXPOS = 3;
+    public static final int A_LOCATION_VERTEX_TANGENT = 4;
+    public static final int A_LOCATION_VERTEX_BITANGENT = 5;
 
     public static final int IND_VERTEX_POS = 0;
     public static final int IND_VERTEX_COLOR = 1;
@@ -43,6 +45,7 @@ public class ShaderProgramBuilder implements HelperBuilder {
 
     public static final String U_SOLID_COLOR_NAME = "solidColor";
     public static final String U_SAMPLER_NAME = "sampler";
+    public static final String U_NORMAL_SAMPLER_NAME = "normalSampler";
 
 
     private String version = "330 core";

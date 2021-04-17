@@ -5,8 +5,8 @@ class ShaderProgram {
     matricesLocations = new Array(ShaderProgramBuilder.U_MATRIX_NAMES.length);
     samplersLocations = new Array(8);
     light = new Array(3);
-    normalLocation = 0
-    solidColorLocation = 0
+    normalSamplerLocation = 0;
+    solidColorLocation = 0;
 
 
     constructor(gl, vertexShaderCode, fragmentShaderCode) {
@@ -40,6 +40,8 @@ class ShaderProgram {
         this.solidColorLocation = gl.getUniformLocation(this.idProgram,
             ShaderProgramBuilder.U_SOLID_COLOR_NAME);
 
+        this.normalSamplerLocation = gl.getUniformLocation(this.idProgram,
+            ShaderProgramBuilder.U_NORMAL_SAMPLER_NAME);
 
         this.light[0] = gl.getUniformLocation(this.idProgram,
             ShaderProgramBuilder.U_LIGHT_NAMES[0]);
@@ -68,6 +70,36 @@ class ShaderProgram {
         this.gl.activeTexture(gl.TEXTURE0);
         this.gl.bindTexture(gl.TEXTURE_2D, idTexture);
         this.gl.uniform1i(samplerLocation, 0);
+    }
+
+
+    uniformObjectTexture(glObject) {
+        var usedUnit = 0;
+
+        if (!!glObject.texture) {
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(glObject.texture.textureType, glObject.texture.idTexture);
+            this.gl.uniform1i(this.samplersLocations[0], 0);
+            ++usedUnit;
+        }
+
+        if (!!glObject.normalTexture) {
+            this.gl.activeTexture(this.gl.TEXTURE0 + usedUnit);
+            this.gl.bindTexture(glObject.normalTexture.textureType,
+                glObject.normalTexture.idTexture);
+            this.gl.uniform1i(this.normalSamplerLocation, usedUnit);
+            ++usedUnit;
+        }
+
+        if (!!glObject.extraTextures) {
+            for (var i = 0; i < glObject.extraTextures.length; ++i) {
+                this.gl.activeTexture(this.gl.TEXTURE0 + usedUnit);
+                glBindTexture(glObject.extraTextures[i].textureType,
+                    glObject.extraTextures[i].idTexture);
+                glUniform1i(this.samplersLocations[i + 1], usedUnit);
+                ++usedUnit;
+            }
+        }
     }
 
     uniformMatrix(m) {
@@ -111,6 +143,22 @@ class ShaderProgram {
             this.matricesLocations[ShaderProgramBuilder.IND_MATRIX_MODEL], false,
             m.model
         );
+    }
+
+    uniform(glObject, m, light) {
+
+        this.uniformObjectTexture(glObject);
+
+        if (!!glObject.transforms) {
+            m.applyModel(glObject.transforms);
+        }
+
+        this.uniformMatrices(m);
+
+        if (!!light) {
+            this.uniformDirectionalLight(light.ambient, light.diffuseColor, light.direction);
+        }
+
     }
 
     uniformDirectionalLight(ambient, lightDiffuse, lightDirection) {
@@ -210,8 +258,6 @@ ShaderProgram.linkProgram = function(gl,
 }
 
 ShaderProgram.createProgram = function(gl, srcVertexShader, srcFragmentShader) {
-    console.log("gl ", gl);
-
     const idVS = ShaderProgram
         .compileShader(gl, gl.VERTEX_SHADER, srcVertexShader);
 

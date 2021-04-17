@@ -29,7 +29,8 @@ class OpenGLKt {
             // AppOGL(TexturedQuadRender(), 300, 300)
             // AppOGL(TexturedCubeRender(), 300, 300)
             // AppOGL(LightTexturedCubeRender(), 300, 300)
-            AppOGL(LightTexturedSphereRender(), 300, 300)
+            // AppOGL(LightTexturedSphereRender(), 300, 300)
+            AppOGL(BumpingSphereRender(), 300, 300)
 
         }
     }

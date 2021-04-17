@@ -85,6 +85,15 @@ class Model {
                 this.texPosComponents);
         }
 
+        if (!!this.vTangent) {
+            ids[4] = Model.createVBO(gl, this.vTangent,
+                ShaderProgramBuilder.A_LOCATION_VERTEX_TANGENT, 3);
+        }
+
+        if (!!this.vBitangent) {
+            ids[5] = Model.createVBO(gl, this.vBitangent,
+                ShaderProgramBuilder.A_LOCATION_VERTEX_BITANGENT, 3);
+        }
 
         if (!!this.indices) {
             // if (count < 255) {
@@ -104,8 +113,17 @@ class Model {
     }
 
     calcTangent() {
-        // val edge1 = Vector3f()
-        // val edge2 = Vector3f()
+        this.vTangent = new Array(this.vPos.length);
+        Model.calcTangent(this.vPos, this.vTexPos, this.indices, this.vTangent, null);
+        return this;
+    }
+
+    calcTangentBitangent() {
+        this.vTangent = new Array(vPos.length);
+        this.vBitangent = new Array(vPos.length);
+        Model.calcTangent(this.vPos, this.vTexPos, this.indices,
+            this.vTangent, this.vBitangent);
+        return this;
     }
 
 
@@ -138,6 +156,179 @@ Model.createVBO = function(gl, data, locations, size) {
     gl.vertexAttribPointer(locations, size, gl.FLOAT, false, 0, 0);
     return idVbo;
 }
+
+
+
+/**
+ * Calculates tangents/bitangents for bumping.
+ *
+ * @param vPos       array of the vertex positions (x,y,z)
+ * @param vTexPos    array of the vertex texture positions (s,t)
+ * @param srcIndices    indices of vertices to draw model with triangles
+ * @param vTangent   array to store calculated tangent vectors (x,y,z)
+ * @param vBitangent array to store calculated tangent vectors (x,y,z)
+ */
+Model.calcTangent = function(vPos, vTexPos, srcIndices, vTangent, vBitangent) {
+    if (!vPos || !vTexPos) {
+        throw "Wrong arguments to calculate calcTangent()";
+    }
+    const posComponents = 3;
+    const texPosComponets = 2;
+    var offset;
+
+    const indices = !srcIndices ? new Array(vPos.length / posComponents) : srcIndices;
+
+    vTangent.fill(0.0);
+
+    if (!!vBitangent) {
+        vBitangent.fill(0.0);
+    }
+
+    if (!srcIndices) {
+        for (var i = 0; i < indices.length; ++i) {
+            indices[i] = i;
+        }
+    }
+
+    // const { vec3, vec2 } = glMatrix;
+
+    const vec3 = glMatrix.vec3;
+    const vec2 = glMatrix.vec2;
+
+    // coordinates of points of triangle
+    const p0 = vec3.create();
+    const p1 = vec3.create();
+    const p2 = vec3.create();
+
+    // texture coordinates of points of triangle
+    const pTex0 = vec2.create();
+    const pTex1 = vec2.create();
+    const pTex2 = vec2.create();
+
+    // for storing calculated edges (p1,p0) and (p2,p0)
+    const deltaP10 = vec3.create();
+    const deltaP20 = vec3.create();
+
+    // for storing calculated edges
+    // in texture coordinates (pTex1, pTex0) and (pTex2,pTex0)
+    const deltaTex10 = vec2.create();
+    const deltaTex20 = vec2.create();
+
+    //
+    const tmp1 = vec3.create();
+    const tmp2 = vec3.create();
+    const tangent = vec3.create();
+    const bitangent = vec3.create();
+
+    var i = 0;
+
+    while (i < indices.length) {
+
+        offset = indices[i] * posComponents;
+        vec3.set(p0, vPos[offset], vPos[offset + 1], vPos[offset + 2]);
+
+        offset = indices[i + 1] * posComponents;
+        vec3.set(p1, vPos[offset], vPos[offset + 1], vPos[offset + 2]);
+
+        offset = indices[i + 2] * posComponents;
+        vec3.set(p2, vPos[offset], vPos[offset + 1], vPos[offset + 2]);
+
+        offset = indices[i] * texPosComponets;
+        vec2.set(pTex0, vTexPos[offset], vTexPos[offset + 1]);
+
+        offset = indices[i + 1] * texPosComponets;
+        vec2.set(pTex1, vTexPos[offset], vTexPos[offset + 1]);
+
+        offset = indices[i + 2] * texPosComponets;
+        vec2.set(pTex2, vTexPos[offset], vTexPos[offset + 1]);
+
+
+        // calc edges
+        vec3.sub(deltaP10, p1, p0);
+        vec3.sub(deltaP20, p2, p0);
+        vec2.sub(deltaTex10, pTex1, pTex0);
+        vec2.sub(deltaTex20, pTex2, pTex0);
+
+        const r = 1.0 / (deltaTex10[0] * deltaTex20[1] - deltaTex10[1] * deltaTex20[0]);
+
+        // tangent = (deltaP10 * deltaTex20.y   - deltaP20 * deltaTex10.y)*r;
+        vec3.scale(tmp1, deltaP10, deltaTex20[1]);
+        vec3.scale(tmp2, deltaP20, deltaTex10[1]);
+        vec3.sub(tangent, tmp1, tmp2);
+        vec3.scale(tangent, tangent, r);
+
+        // add same tangent for each points of triangle
+        // if point already had tangent we will
+        // average tangent from old value and new value
+        offset = indices[i] * posComponents;
+        vTangent[offset] += tangent[0]; // x
+        vTangent[offset + 1] += tangent[1]; // y
+        vTangent[offset + 2] += tangent[2]; // z
+
+        offset = indices[i + 1] * posComponents;
+        vTangent[offset] += tangent[0];
+        vTangent[offset + 1] += tangent[1];
+        vTangent[offset + 2] += tangent[2];
+
+        offset = indices[i + 2] * posComponents;
+        vTangent[offset] += tangent[0];
+        vTangent[offset + 1] += tangent[1];
+        vTangent[offset + 2] += tangent[2];
+
+        if (!!vBitangent) {
+            // bitangent = (deltaP20 * deltaTex10.x   - deltaP10 * deltaTex20.x)*r;
+            vec3.scale(tmp1, deltaP20, deltaTex10[0]);
+            vec3.scale(tmp2, deltaP10, deltaTex20[0]);
+            vec3.sub(bitangent, tmp1, tmp2);
+            vec3.scale(bitangent, bitangent, r);
+
+            // add same bitangent for each points of triangle
+            // if point already had bitangent we will
+            // average bitangent from old value and new value
+            offset = indices[i] * posComponents;
+            vBitangent[offset] += bitangent[0];
+            vBitangent[offset + 1] += bitangent[1];
+            vBitangent[offset + 2] += bitangent[2];
+
+            offset = indices[i + 1] * posComponents;
+            vBitangent[offset] += bitangent[0];
+            vBitangent[offset + 1] += bitangent[1];
+            vBitangent[offset + 2] += bitangent[2];
+
+            offset = indices[i + 2] * posComponents;
+            vBitangent[offset] += bitangent[0];
+            vBitangent[offset + 1] += bitangent[1];
+            vBitangent[offset + 2] += bitangent[2];
+        }
+        i += 3;
+    }
+
+    Model.normalize3(vTangent);
+
+    if (!!vBitangent) {
+        Model.normalize3(vBitangent);
+    }
+
+}
+
+
+Model.normalize3 = function(src) {
+    const v = glMatrix.vec3.create();
+    var i = 0;
+
+    while (i < src.length) {
+        glMatrix.vec3.set(v, src[i], src[i + 1], src[i + 2]);
+        glMatrix.vec3.normalize(v, v);
+
+        src[i] = v[0];
+        src[i + 1] = v[1];
+        src[i + 2] = v[2];
+
+        i += 3;
+    }
+}
+
+
 
 
 class ModelBuilder {

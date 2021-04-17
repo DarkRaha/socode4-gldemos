@@ -2,8 +2,12 @@ package com.darkraha.opengldemokt.gl
 
 
 import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder
+import com.darkraha.opengldemokt.gl.shader.ShaderProgramBuilder.Companion.U_NORMAL_SAMPLER_NAME
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL13
+import org.lwjgl.opengl.GL20
 import org.lwjgl.opengl.GL33.*
 import org.lwjgl.system.MemoryUtil
 
@@ -17,7 +21,7 @@ class ShaderProgram {
     private val matricesLocations = IntArray(ShaderProgramBuilder.U_MATRIX_NAMES.size)
     private val samplersLocations = IntArray(8)
     private val light = IntArray(3)
-    private val normalLocation = 0
+    private var normalSamplerLocation = 0
 
     var solidColorLocation = 0
         private set
@@ -40,17 +44,23 @@ class ShaderProgram {
 
     fun setupLocations() {
         glUseProgram(idProgram)
+
         for (i in matricesLocations.indices) {
             matricesLocations[i] = glGetUniformLocation(
                 idProgram,
                 ShaderProgramBuilder.U_MATRIX_NAMES[i]
             )
         }
+
         samplersLocations[0] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SAMPLER_NAME)
         for (i in 1 until samplersLocations.size) {
             samplersLocations[i] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SAMPLER_NAME + i)
         }
+
         solidColorLocation = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_SOLID_COLOR_NAME)
+
+        normalSamplerLocation = glGetUniformLocation(idProgram, U_NORMAL_SAMPLER_NAME)
+
         light[0] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[0])
         light[1] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[1])
         light[2] = glGetUniformLocation(idProgram, ShaderProgramBuilder.U_LIGHT_NAMES[2])
@@ -67,6 +77,8 @@ class ShaderProgram {
         val ind = texture.textureUnit - GL_TEXTURE0
         glUniform1i(samplersLocations[ind], ind)
     }
+
+
 
     fun uniformTexture(idTexture: Int) {
         val samplerLocation = glGetUniformLocation(idProgram, "sampler")
@@ -101,7 +113,7 @@ class ShaderProgram {
         )
         glUniformMatrix4fv(
             matricesLocations[ShaderProgramBuilder.IND_MATRIX_VIEW], false,
-            m.camera[MATRIX_BUFFER]
+            m.view[MATRIX_BUFFER]
         )
         glUniformMatrix4fv(
             matricesLocations[ShaderProgramBuilder.IND_MATRIX_VIEW_MODEL], false,
@@ -124,6 +136,45 @@ class ShaderProgram {
         glUniform3f(light[0], ambient.x, ambient.y, ambient.z)
         glUniform3f(light[1], lightDiffuse.x, lightDiffuse.y, lightDiffuse.z)
         glUniform3f(light[2], lightDirection.x, lightDirection.y, lightDirection.z)
+    }
+
+
+    private fun uniformObjectTexture(glObject: GlObject) {
+        var usedUnit = 0
+
+        glObject.texture?.also {
+            glActiveTexture(GL_TEXTURE0)
+            glBindTexture(it.textureType, it.idTexture)
+            glUniform1i(samplersLocations[0], 0)
+            ++usedUnit
+        }
+
+        glObject.normalTexture?.also {
+            glActiveTexture(GL_TEXTURE0 + usedUnit)
+            glBindTexture(it.textureType, it.idTexture)
+            glUniform1i(normalSamplerLocation, usedUnit)
+            ++usedUnit
+        }
+
+        glObject.extraTextures?.also {
+            for (i in it.indices) {
+                glActiveTexture(GL_TEXTURE0 + usedUnit)
+                glBindTexture(it[i].textureType, it[i].idTexture)
+                glUniform1i(samplersLocations[i + 1], usedUnit)
+                ++usedUnit
+            }
+        }
+    }
+
+    fun uniform(glObject: GlObject, m: Matrices, light: LightDirectional?) {
+        uniformObjectTexture(glObject)
+
+        glObject.transforms?.apply {  m.applyModel(this) }
+        uniformMatrices(m)
+
+        light?.apply {
+            uniformDirectionalLight(ambient!!, diffuseColor!!, direction!!)
+        }
     }
 
 

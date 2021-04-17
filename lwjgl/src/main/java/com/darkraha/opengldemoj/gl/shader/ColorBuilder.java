@@ -58,7 +58,7 @@ public class ColorBuilder implements HelperBuilder {
 
         if (shaderType == SHADER_TYPE_VERTEX) {
             if (usePerVertex && useSolidColor) {
-                sb.append("exColor = vColor * solidColor");
+                sb.append("exColor = vColor * solidColor;\n");
             } else if (usePerVertex) {
                 sb.append("exColor = vColor;\n");
             } else if (useSolidColor) {

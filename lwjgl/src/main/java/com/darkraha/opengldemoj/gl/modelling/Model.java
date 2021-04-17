@@ -47,10 +47,14 @@ public class Model {
 
         int idVao = glGenVertexArrays();
         glBindVertexArray(idVao);
-        ids[1] = createVBO(vPos, ShaderProgramBuilder.A_LOCATION_VERTEX_POS, posComponents);
-        ids[2] = vColor != null ? createVBO(vColor, ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR, colorComponents) : 0;
-        ids[3] = vNormal != null ? createVBO(vNormal, ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL, normalComponents) : 0;
-        ids[4] = vTexPos != null ? createVBO(vTexPos, ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS, texPosComponents) : 0;
+        ids[0] = createVBO(vPos, ShaderProgramBuilder.A_LOCATION_VERTEX_POS, posComponents);
+        ids[1] = vColor != null ? createVBO(vColor, ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR, colorComponents) : 0;
+        ids[2] = vNormal != null ? createVBO(vNormal, ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL, normalComponents) : 0;
+        ids[3] = vTexPos != null ? createVBO(vTexPos, ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS, texPosComponents) : 0;
+        ids[4] = vTangent != null ? createVBO(vTangent, ShaderProgramBuilder.A_LOCATION_VERTEX_TANGENT,
+                3) : 0;
+        ids[5] = vBitangent != null ? createVBO(vBitangent, ShaderProgramBuilder.A_LOCATION_VERTEX_BITANGENT,
+                3) : 0;
 
         int idIbo = indices != null ? createIBO(indices) : 0;
 
@@ -63,6 +67,21 @@ public class Model {
         glBindVertexArray(0);
         return new GlModel(idVao, ids, idIbo, drawType, count, name);
     }
+
+    public Model calcTangent(){
+        vTangent = new float[vPos.length];
+        calcTangent(vPos,vTexPos,indices, vTangent,null);
+        return this;
+    }
+
+    public Model calcTangentBitangent(){
+        vTangent = new float[vPos.length];
+        vBitangent = new float[vPos.length];
+        calcTangent(vPos,vTexPos,indices, vTangent,vBitangent);
+        return this;
+    }
+
+
 
     /**
      * Calculates tangents/bitangents for bumping.
@@ -122,7 +141,7 @@ public class Model {
             offset = indices[i + 1] * posComponents;
             p1.set(vPos[offset], vPos[offset + 1], vPos[offset + 2]);
             offset = indices[i + 2] * posComponents;
-            p1.set(vPos[offset], vPos[offset + 1], vPos[offset + 2]);
+            p2.set(vPos[offset], vPos[offset + 1], vPos[offset + 2]);
 
             offset = indices[i] * texPosComponets;
             pTex0.set(vTexPos[offset], vTexPos[offset + 1]);
@@ -196,6 +215,16 @@ public class Model {
         }
     }
 
+    public static void normalize3(float[] src) {
+        Vector3f v = new Vector3f();
+        for (int i = 0; i < src.length; i += 3) {
+            v.set(src[i], src[i + 1], src[i + 2]);
+            v.normalize();
+            src[i] = v.x;
+            src[i + 1] = v.y;
+            src[i + 2] = v.z;
+        }
+    }
 
     //----------------------------------------------------------------------------
     //
@@ -238,19 +267,6 @@ public class Model {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, idIbo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteBuffer, GL_STATIC_DRAW);
             return idIbo;
-        }
-    }
-
-    //----------------------------------------------------------------------------
-    //
-    public static void normalize3(float[] src) {
-        Vector3f v = new Vector3f();
-        for (int i = 0; i < src.length; i += 3) {
-            v.set(src[i], src[i + 1], src[i + 2]);
-            v.normalize();
-            src[i] = v.x;
-            src[i + 1] = v.y;
-            src[i + 2] = v.z;
         }
     }
 

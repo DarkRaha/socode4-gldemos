@@ -176,6 +176,10 @@ class LightBuilder {
     addInputDeclarations(sb, shaderType) {
         if (shaderType == 1) {
             sb = sb + "layout(location=2) in vec3 vNormal;\n";
+
+            if (this.withBumping) {
+                sb = sb + "layout(location=4) in vec3 vTangent;\n";
+            }
         }
         return sb;
     }
@@ -185,33 +189,74 @@ class LightBuilder {
 
         if (shaderType == 1) {
             sb = sb + "uniform Light light;\n";
-            sb = sb + "uniform vec3 ambient;\n";
         }
+        if (shaderType == 2) {
+            if (this.withBumping) {
+                sb = sb + "uniform sampler2D normalSampler;\n";
+            }
+        }
+
         return sb;
     }
 };
 
 class DirectionLightBuilder extends LightBuilder {
     addExchangeDeclarations(sb, shaderType) {
-        if (shaderType == 1) {
-            sb = sb + "out vec3 exLighting;\n";
-        }
+        if (this.withBumping) {
+            if (shaderType == 1) {
+                sb = sb + "out Light exLight;\n";
+            }
 
-        if (shaderType == 2) {
-            sb = sb + "in vec3 exLighting;\n";
+            if (shaderType == 2) {
+                sb = sb + "in Light exLight;\n";
+            }
+        } else {
+            if (shaderType == 1) {
+                sb = sb + "out vec3 exLighting;\n";
+            }
+            if (shaderType == 2) {
+                sb = sb + "in vec3 exLighting;\n";
+            }
         }
 
         return sb;
     }
 
     addFuncsDeclarations(sb, shaderType) {
+
+
         if (shaderType == 1) {
-            sb = sb + "vec3 calcLight(){\n";
-            sb = sb + "  vec4 transformedNormal = mNormal *vec4 (vNormal,1.0);\n";
-            sb = sb + "  float direction = max(dot(transformedNormal.xyz, light.direction), 0.0);\n";
-            sb = sb + "  return  light.ambient + (light.diffuse * direction);\n";
-            //sb = sb + "  return vec3(0.5,0.5,0.5);\n";
-            sb = sb + "}\n";
+            if (this.withBumping) {
+                sb = sb + "\nvoid prepareLight(){\n";
+                sb = sb + "  vec3 normal = normalize(m*vec4(vNormal,0)).xyz;\n";
+                sb = sb + "  vec3 tangent = normalize(m*vec4(vTangent,0)).xyz;\n";
+                sb = sb + "  tangent = normalize(tangent - dot(tangent, normal) * normal);\n";
+                sb = sb + "  vec3 bitangent = cross(normal, tangent);\n";
+                sb = sb + "  mat3 miTBN = transpose(mat3(tangent, bitangent, normal));\n";
+                sb = sb + "  exLight = Light(light.ambient,light.diffuse,  normalize(miTBN*(light.direction)));\n";
+                sb = sb + "}\n";
+            } else {
+                sb = sb + "vec3 calcLight(){\n";
+                sb = sb + "  vec4 transformedNormal = mNormal *vec4 (vNormal,1.0);\n";
+                sb = sb + "  float f = max(dot(transformedNormal.xyz, light.direction), 0.0);\n";
+                sb = sb + "  return  light.ambient + (light.diffuse * f);\n";
+                //sb = sb + "  return vec3(0.5,0.5,0.5);\n";
+                sb = sb + "}\n";
+            }
+        }
+
+        if (shaderType == 2) {
+            if (this.withBumping) {
+                sb = sb + "vec3 calcLight(){\n";
+                sb = sb + "  vec3 bumpNormal = texture(normalSampler, exTexPos).xyz;\n";
+                sb = sb + "  bumpNormal = 2.0 * bumpNormal - vec3(1.0, 1.0, 1.0);\n";
+                sb = sb + "  float f = max(0.0, dot(bumpNormal.xyz, exLight.direction));\n";
+                //   sb.append("  float f = dot(bumpNormal.xyz, exLight.direction);\n");
+                // sb = sb + "return exLight.direction;\n";
+                sb = sb + "  return  clamp(exLight.ambient + (exLight.diffuse * f), 0.0,1.0);\n";
+                //   sb.append("  return  exLight.ambient + (exLight.diffuse * f);\n");
+                sb = sb + "}\n";
+            }
         }
 
         return sb;
@@ -219,9 +264,18 @@ class DirectionLightBuilder extends LightBuilder {
 
     addCalculations(sb, shaderType) {
         if (shaderType == 1) {
-            sb = sb + " exLighting = calcLight();\n";
+            if (this.withBumping) {
+                sb = sb + "  prepareLight();\n";
+            } else {
+                sb = sb + "  exLighting = calcLight();\n";
+            }
         }
+
         if (shaderType == 2) {
+            if (this.withBumping) {
+                sb = sb + "vec3 exLighting = calcLight();\n";
+            }
+
             sb = sb + "fragColor = vec4(fragColor.rgb * exLighting, fragColor.a);\n";
 
         }
@@ -426,6 +480,8 @@ ShaderProgramBuilder.A_LOCATION_VERTEX_POS = 0;
 ShaderProgramBuilder.A_LOCATION_VERTEX_COLOR = 1;
 ShaderProgramBuilder.A_LOCATION_VERTEX_NORMAL = 2;
 ShaderProgramBuilder.A_LOCATION_VERTEX_TEXPOS = 3;
+ShaderProgramBuilder.A_LOCATION_VERTEX_TANGENT = 4;
+ShaderProgramBuilder.A_LOCATION_VERTEX_BITANGENT = 5;
 ShaderProgramBuilder.IND_VERTEX_POS = 0;
 ShaderProgramBuilder.IND_VERTEX_COLOR = 1;
 ShaderProgramBuilder.IND_VERTEX_NORMAL = 2;
@@ -440,6 +496,7 @@ ShaderProgramBuilder.IND_MATRIX_MODEL = 4;
 ShaderProgramBuilder.IND_MATRIX_NORMAL = 5;
 ShaderProgramBuilder.U_SOLID_COLOR_NAME = "solidColor";
 ShaderProgramBuilder.U_SAMPLER_NAME = "sampler";
+ShaderProgramBuilder.U_NORMAL_SAMPLER_NAME = "normalSampler";
 
 ShaderProgramBuilder.U_MATRIX_NAMES = [
     "m", "mP", "mVM", "mV", "mM", "mNormal"

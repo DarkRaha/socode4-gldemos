@@ -1,5 +1,6 @@
 package com.darkraha.opengldemoj.gl.shader;
 
+import static com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder.SHADER_TYPE_FRAGMENT;
 import static com.darkraha.opengldemoj.gl.shader.ShaderProgramBuilder.SHADER_TYPE_VERTEX;
 
 abstract public class LightBuilder implements HelperBuilder {
@@ -20,6 +21,9 @@ abstract public class LightBuilder implements HelperBuilder {
     public void addInputDeclarations(StringBuilder sb, int shaderType) {
         if (shaderType == SHADER_TYPE_VERTEX) {
             sb.append("layout(location=2) in vec3 vNormal;\n");
+            if(withBumping) {
+                sb.append("layout(location=4) in vec3 vTangent;\n");
+            }
         }
     }
 
@@ -30,5 +34,13 @@ abstract public class LightBuilder implements HelperBuilder {
         if (shaderType == SHADER_TYPE_VERTEX) {
             sb.append("uniform Light light;\n");
         }
+
+        if(shaderType==SHADER_TYPE_FRAGMENT){
+            if(withBumping){
+                sb.append("uniform sampler2D normalSampler;\n");
+            }
+        }
+
+
     }
 }

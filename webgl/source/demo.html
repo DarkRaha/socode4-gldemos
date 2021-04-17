@@ -25,7 +25,7 @@
     <script src="js/gl/shaders/shaderbuildera.js"></script>
     <script src="js/gl/gltexture.js"></script>
     <script src="js/gl/globject.js"></script>
-
+    <script src="js/gl/light.js"></script>
 
     <script src="js/renders/render.js"></script>
     <script src="js/renders/quadrender.js"></script>
@@ -35,7 +35,7 @@
     <script src="js/renders/texturedcuberender.js"></script>
     <script src="js/renders/lighttexturedcuberender.js"></script>
     <script src="js/renders/lighttexturedsphere.js"></script>
-
+    <script src="js/renders/bumpingsphererender.js"></script>
 
     <script src="js/renders/modelrender.js"></script>
 
@@ -49,8 +49,10 @@
     <script>
         $(() => {
             const app = new AppOGL("myCanvas");
+            // app.setRender(new ModelRender());
+            app.setRender(new BumpingSphereRender());
 
-            app.setRender(new LightTexturedSphereRender());
+            //app.setRender(new LightTexturedSphereRender());
             //app.setRender(new TexturedCubeRender());
             // app.setRender(new ModelRender());
 

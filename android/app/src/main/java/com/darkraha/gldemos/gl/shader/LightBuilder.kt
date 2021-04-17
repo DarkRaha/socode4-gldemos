@@ -18,6 +18,9 @@ abstract class LightBuilder : HelperBuilder {
     override fun addInputDeclarations(sb: StringBuilder, shaderType: Int) {
         if (shaderType == SHADER_TYPE_VERTEX) {
             sb.append("layout(location=2) in vec3 vNormal;\n")
+            if (withBumping) {
+                sb.append("layout(location=4) in vec3 vTangent;\n")
+            }
         }
     }
 
@@ -26,5 +29,11 @@ abstract class LightBuilder : HelperBuilder {
         if (shaderType == SHADER_TYPE_VERTEX) {
             sb.append("uniform Light light;\n")
         }
+        if (shaderType == ShaderProgramBuilder.SHADER_TYPE_FRAGMENT) {
+            if (withBumping) {
+                sb.append("uniform sampler2D normalSampler;\n")
+            }
+        }
     }
+
 }
